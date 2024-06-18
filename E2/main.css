@@ -1,0 +1,96 @@
+/* Reset de estilos básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo general del cuerpo y contenedor principal */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f0f0f0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Estilos para los contenedores principales */
+.container-head {
+    margin-bottom: 15px;
+}
+
+.container-vis {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+}
+
+.container-references {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
+}
+
+/* Estilos para los títulos y descripciones */
+.title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333; /* Color más ligero */
+}
+
+.main-title {
+    font-size: 2em; /* Tamaño más grande para el título principal */
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.description {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Estilos para las visualizaciones */
+.vis {
+    margin-top: 15px;
+}
+
+/* Estilos para los filtros y otras instrucciones */
+.filters, .instructions {
+    margin-bottom: 10px;
+}
+
+/* Estilo específico para las visualizaciones */
+#vis-1, #vis-2 {
+    width: 100%;
+    height: 400px; /* Ajusta según el tamaño de tus visualizaciones */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+/* Estilos para los botones */
+.filters button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.filters button:hover {
+    background-color: #e0e0e0;
+}
