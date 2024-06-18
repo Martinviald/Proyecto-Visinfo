@@ -1,4 +1,4 @@
-﻿Search Parameters;Year;Mo;Dy;Hr;Mn;Tsu;Country;Location Name;Latitude;Longitude;Focal Depth (km);Mag;Deaths;Missing;Injuries;Damage ($Mil);Houses Destroyed;Houses Damaged
+﻿Search Parameters;Year;Month;Day;Hour;Minute;Tsunami;Country;Location Name;Latitude;Longitude;Focal Depth (km);Magnitude;Deaths;Missing;Injuries;Damage ($Mil);Houses Destroyed;Houses Damaged
 "[""Region = 160 - South America"",""Country = CHILE""]";;;;;;;;;;;;;;;;;;
 ;1520;;;;;;CHILE;CHILE;-40;-74;;;;;;;;
 ;1543;;;;;;CHILE;CHILE;-19;-70,5;;;;;;;;
