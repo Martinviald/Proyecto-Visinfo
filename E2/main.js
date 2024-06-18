@@ -7,8 +7,8 @@ const SVG1 = d3.select("#vis-1").append("svg");
 const SVG2 = d3.select("#vis-2").append("svg");
 
 // Editar tamaños como estime conveniente
-const WIDTH_VIS_1 = 800;
-const HEIGHT_VIS_1 = 250;
+const WIDTH_VIS_1 = 858;
+const HEIGHT_VIS_1 = 400;
 
 // const WIDTH_VIS_2 = 800;
 // const HEIGHT_VIS_2 = 1600;
@@ -24,7 +24,7 @@ const HEIGHTVIS_VIS_1 = HEIGHT_VIS_1 - MARGIN.top - MARGIN.bottom;
 const WIDTHVIS_VIS_1 = WIDTH_VIS_1 - MARGIN.right - MARGIN.left;
 
 
-// SVG1.attr("width", WIDTH_VIS_1).attr("height", HEIGHT_VIS_1);
+SVG1.attr("width", WIDTH_VIS_1).attr("height", HEIGHT_VIS_1);
 // SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
 
 const escalaColorCategorica1 = d3
@@ -40,7 +40,7 @@ function generateEarthquakeImpactGraphs() {
     // Creamos un contenedor específico para agregar la visualización.
     const contenedor = SVG1
         .append("g")
-        .attr("transform", `translate(${MARGIN.left} ${MARGIN.top})`); 
+        .attr("transform", `translate(${-200} ${1000})`); 
 
     fetchEarthquakeData().then(data => {
         console.log(data);
@@ -93,23 +93,14 @@ function generateEarthquakeImpactGraphs() {
         .domain([minHousesDamaged, maxHousesDamaged])
         .range([0, HEIGHTVIS_VIS_1]);
 
+        const maxYear = d3.max(data, (d) => d.Year);
+        const minYear = d3.min(data, (d) => d.Year);
         const escalaX = d3
-        .scaleBand()
-        .domain(data.map((d) => d.Year))
-        .range([0, WIDTHVIS_VIS_1])
-        .padding(0.1);
+        .scaleLinear()
+        .domain([minYear, maxYear])
+        .range([0, WIDTHVIS_VIS_1]);
 
         const ejeX = d3.axisBottom(escalaX);
-
-        // Agrega un título a la visualización
-        SVG1
-        .append("g")
-        .append("text")
-        .attr("x", WIDTH_VIS_1 / 2)
-        .attr("y", MARGIN.top / 2)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "24px")
-        .text("Visualización 1");
 
         contenedor
         .selectAll(".casita")
@@ -125,6 +116,7 @@ function generateEarthquakeImpactGraphs() {
                     .attr("x", (d) => escalaX(d.Year))
                     .attr("y", (d) => escalaYDamage(d.Damage));
 
+                return CASITA
             },
         )
     })
