@@ -1,17 +1,6 @@
 function fetchEarthquakeData() {
-    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYGWV6NCDHRIQADBKGQZTR7ZDA";
-    return d3.dsv(';', TERREMOTOS_URL).then(data => {
-        return data.map((d,i) => {
-            d.id = i;
-            delete d['Search Parameters']; // Elimina la columna 'search parameters'
-            for (let prop in d) {
-                if (d[prop] === null || d[prop] === '') { // Si el dato es nulo o una cadena vacía
-                    d[prop] = 0; // Reemplaza por 0
-                }
-            }
-            return d;
-        });
-    });
+    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYHSXWYSJDCZJ77YKE6ZTSAAAA";
+    return d3.csv(TERREMOTOS_URL);
 }
 
 const SVG1 = d3.select("#vis-1").append("svg");
@@ -50,10 +39,11 @@ function generateEarthquakeImpactGraphs() {
 
     // Creamos un contenedor específico para agregar la visualización.
     const contenedor = SVG1
-        .append("g");
-        // .attr("transform", `translate(${MARGIN.left} ${MARGIN.top})`); 
+        .append("g")
+        .attr("transform", `translate(${MARGIN.left} ${MARGIN.top})`); 
 
     fetchEarthquakeData().then(data => {
+        console.log(data);
         const maxDeaths = d3.max(data, (d) => d.Deaths);
         const minDeaths = d3.min(data, (d) => d.Deaths);
         const escalaDeaths = d3
@@ -75,17 +65,18 @@ function generateEarthquakeImpactGraphs() {
         .domain([minInjuries, maxInjuries])
         .range([0, HEIGHTVIS_VIS_1]);
 
-        const maxEconomicDamage = d3.max(data, (d) => d.EconomicDamage);
-        const minEconomicDamage = d3.min(data, (d) => d.EconomicDamage);
 
-        const escalaEconomicDamage = d3
+        const maxDamage = d3.max(data, (d) => d.Damage);
+        const minDamage = d3.min(data, (d) => d.Damage);
+
+        const escalaDamage = d3
         .scaleLinear()
-        .domain([minEconomicDamage, maxEconomicDamage])
+        .domain([minDamage, maxDamage])
         .range([0, HEIGHTVIS_VIS_1]);
 
-        const escalaYEconomicDamage = d3
+        const escalaYDamage = d3
         .scaleLinear()
-        .domain([minEconomicDamage, maxEconomicDamage])
+        .domain([minDamage, maxDamage])
         .range([HEIGHTVIS_VIS_1, 0]);
 
         const maxHousesDestroyed = d3.max(data, (d) => d.HousesDestroyed);
@@ -128,9 +119,9 @@ function generateEarthquakeImpactGraphs() {
                 CASITA.append("rect")
                     .attr("class", "Gráfico Personas")
                     .attr("width", escalaX.bandwidth())
-                    .attr("height", (d) => escalaEconomicDamage(d.EconomicDamage))
+                    .attr("height", (d) => escalaDamage(d.Damage))
                     .attr("x", (d) => escalaX(d.Year))
-                    .attr("y", (d) => escalaYEconomicDamage(d.EconomicDamage));
+                    .attr("y", (d) => escalaYDamage(d.Damage));
 
             },
         )
