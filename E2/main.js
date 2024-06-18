@@ -1,5 +1,5 @@
 function fetchEarthquakeData() {
-    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/main/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTS6A5OQ2VXF62ROHZI3JUEZTR6NNQ";
+    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYGWV6NCDHRIQADBKGQZTR7ZDA";
     return d3.dsv(';', TERREMOTOS_URL).then(data => {
         return data.map((d,i) => {
             d.id = i;
