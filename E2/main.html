@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <script src="https://d3js.org/d3.v7.js"></script>
+    <title>E2 - Terremotos de Chile</title>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="container-head">
+            <div class="main-title">Análisis de Terremotos en Chile</div>
+            <div class="description">Este proyecto visualiza datos históricos de terremotos registrados en Chile desde 1900.</div>
+        </div>
+
+        <div class="container-vis">
+            <div class="container-head">
+                <div class="title">Frecuencia de Terremotos por Región</div>
+                <div class="description">Explora cómo se distribuyen los terremotos según la región geográfica en Chile.</div>
+            </div>
+            <div class="vis">
+                <div class="filters">
+                    <button>Región Metropolitana</button>
+                    <button>Valparaíso</button>
+                    <button>Maule</button>
+                </div>
+                <div id="vis-1">
+                    <!-- Aquí se renderizará la visualización 1 -->
+                </div>
+                <div class="instructions">Selecciona una región para visualizar la frecuencia de terremotos.</div>
+            </div>
+        </div>
+
+        <div class="container-vis">
+            <div class="container-head">
+                <div class="title">Magnitud de los Terremotos</div>
+                <div class="description">Análisis de la magnitud de los terremotos registrados en Chile y su evolución temporal.</div>
+            </div>
+            <div class="vis">
+                <div class="filters">
+                    <button>4.0 - 4.9</button>
+                    <button>5.0 - 5.9</button>
+                    <button>6.0 o más</button>
+                </div>
+                <div id="vis-2">
+                    <!-- Aquí se renderizará la visualización 2 -->
+                </div>
+                <div class="instructions">Filtrar por magnitud para observar la distribución de terremotos por intensidad.</div>
+            </div>
+        </div>
+        
+        <div class="container-references">
+            <div class="title">Referencias</div>
+            <div class="description">Aquí se listarán las fuentes de datos utilizadas para este proyecto.</div>
+        </div>
+
+    </div>
+
+    <script src="main.js"></script>
+    <!-- <script src="configuration.js"></script> -->
+</body>
+
+</html>
