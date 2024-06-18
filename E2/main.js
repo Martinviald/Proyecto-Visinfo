@@ -1,5 +1,5 @@
 function fetchEarthquakeData() {
-    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYHSXWYSJDCZJ77YKE6ZTSAAAA";
+    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes_clean.csv?token=GHSAT0AAAAAACTVPHYG7MUJSIEENCP3STRGZTSAWLQ";
     return d3.csv(TERREMOTOS_URL);
 }
 
@@ -99,6 +99,8 @@ function generateEarthquakeImpactGraphs() {
         .range([0, WIDTHVIS_VIS_1])
         .padding(0.1);
 
+        const ejeX = d3.axisBottom(escalaX);
+
         // Agrega un título a la visualización
         SVG1
         .append("g")
@@ -118,7 +120,7 @@ function generateEarthquakeImpactGraphs() {
 
                 CASITA.append("rect")
                     .attr("class", "Gráfico Personas")
-                    .attr("width", escalaX.bandwidth())
+                    .attr("width", 10)
                     .attr("height", (d) => escalaDamage(d.Damage))
                     .attr("x", (d) => escalaX(d.Year))
                     .attr("y", (d) => escalaYDamage(d.Damage));
