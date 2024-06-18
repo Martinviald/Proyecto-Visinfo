@@ -1,6 +1,6 @@
 function fetchEarthquakeData() {
-    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes_clean.csv?token=GHSAT0AAAAAACTVPHYG7MUJSIEENCP3STRGZTSAWLQ";
-    return d3.csv(TERREMOTOS_URL);
+    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYGR2UPEFUU7OUGLFTGZTSCG4A";
+    return d3.csv(TERREMOTOS_URL, d3.autoType);
 }
 
 const SVG1 = d3.select("#vis-1").append("svg");
@@ -39,8 +39,8 @@ function generateEarthquakeImpactGraphs() {
 
     // Creamos un contenedor específico para agregar la visualización.
     const contenedor = SVG1
-        .append("g")
-        .attr("transform", `translate(${-200} ${1000})`); 
+        .append("g");
+        // .attr("transform", `translate(${-200} ${1000})`); 
 
     fetchEarthquakeData().then(data => {
         console.log(data);
@@ -68,6 +68,10 @@ function generateEarthquakeImpactGraphs() {
 
         const maxDamage = d3.max(data, (d) => d.Damage);
         const minDamage = d3.min(data, (d) => d.Damage);
+        // const maxDamage = 30000;
+
+        console.log(maxDamage);
+        console.log(minDamage);
 
         const escalaDamage = d3
         .scaleLinear()
@@ -98,7 +102,7 @@ function generateEarthquakeImpactGraphs() {
         const escalaX = d3
         .scaleLinear()
         .domain([minYear, maxYear])
-        .range([0, WIDTHVIS_VIS_1]);
+        .range([0, WIDTH_VIS_1/3]);
 
         const ejeX = d3.axisBottom(escalaX);
 
