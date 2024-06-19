@@ -449,6 +449,12 @@ function generateEarthquakeImpactGraphs(data) {
                     Día: ${d.Day}<br>
                     Lugar epicentro: ${d.LocationName}<br>
                     Magnitud: ${d.Magnitude}<br>
+                    Muertos: ${d.Deaths}<br>
+                    Lesionados: ${d.Injuries}<br>
+                    Desaparecidos: ${d.Missing}<br>
+                    Daño económico: ${d.Damage}<br>
+                    Casas destruidas: ${d.HousesDestroyed}<br>
+                    Casas dañadas: ${d.HousesDamaged}<br>
                 `)
                 .style("opacity", 1)
                 .style("left", (event.pageX + 10) + "px")
@@ -459,7 +465,7 @@ function generateEarthquakeImpactGraphs(data) {
         });
         // lineas.style("visibility", "hidden");
         lineas.style("stroke-opacity", 0.1);
-        lineas.style("stroke-width", 0.1);
+        lineas.style("stroke-width", 0.2);
     })
     .on("mouseleave", (evento, d) => {
         puntos.style("opacity", 1)
