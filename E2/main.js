@@ -1,6 +1,6 @@
 function fetchEarthquakeData() {
-    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/estructuraJS/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYHDWSIZ5JQG3L3QSU4ZTTAXAA";
-    return d3.csv(TERREMOTOS_URL, d3.autoType);
+    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/main/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTS6A5PWC6NWD5UFBMETS5OZTTCZRA";
+    return d3.csv("chile_earthquakes.csv", d3.autoType);
 }
 
 const SVG1 = d3.select("#vis-1").append("svg");
@@ -10,8 +10,8 @@ const SVG2 = d3.select("#vis-2").append("svg");
 const WIDTH_VIS_1 = 858;
 const HEIGHT_VIS_1 = 400;
 
-// const WIDTH_VIS_2 = 800;
-// const HEIGHT_VIS_2 = 1600;
+const WIDTH_VIS_2 = 770;
+const HEIGHT_VIS_2 = 1600;
 
 const MARGIN = {
     top: 20,
@@ -27,7 +27,7 @@ const WIDTHVIS_VIS_1 = WIDTH_VIS_1 - MARGIN.right - MARGIN.left;
 
 
 SVG1.attr("width", WIDTH_VIS_1).attr("height", HEIGHT_VIS_1);
-// SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
+SVG2.attr("width", WIDTH_VIS_2).attr("height", HEIGHT_VIS_2);
 
         
 const escalaColorCategorica2 = d3
@@ -105,8 +105,8 @@ function generateEarthquakeImpactGraphs() {
         const maxDamage = d3.max(data, (d) => d.Damage);
         const minDamage = d3.min(data, (d) => d.Damage);
 
-        console.log(maxDamage);
-        console.log(minDamage);
+        // console.log(maxDamage);
+        // console.log(minDamage);
 
         const escalaDamage = d3
         .scaleLinear()
@@ -183,7 +183,7 @@ function generateEarthquakeImpactGraphs() {
                 return update
             },
             exit => {
-                console.log("Holaaa");
+                // console.log("Holaaa");
                 // exit.selectAll(".Deaths").remove()
                 // exit.remove()
                 return exit
@@ -309,4 +309,48 @@ function generateEarthquakeImpactGraphs() {
         .attr("d", linea6);
 
     })
+}
+
+generateMapGraph();
+
+function generateMapGraph() {
+
+    const EarthquakeData = fetchEarthquakeData();
+
+    EarthquakeData.then(data => {
+        console.log("EarthquakeData:")
+        console.log(data);
+
+        d3.json("regiones_chile.json").then((MapData) => {
+            console.log("MapData:")
+            console.log(MapData);
+
+            // Define la transformación
+            const proyeccion = d3.geoMercator()
+            .rotate([-25, 90]) // Rotamos el mapa 90 grados
+            .fitSize([WIDTH_VIS_2, HEIGHT_VIS_2], MapData)
+            .center([0, -19])
+            // .translate([0, 0]);
+
+            const caminosGeo = d3.geoPath().projection(proyeccion);
+
+            SVG2
+            .selectAll("path")
+            .data(MapData.features)
+            .join("path")
+            .attr("d", caminosGeo)
+            .attr("stroke", "#ccc");
+
+            // Agrega los puntos para cada terremoto
+            SVG2
+            .selectAll("circle")
+            .data(data)
+            .join("circle")
+            .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
+            .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
+            .attr("r", 1.5) // radio del círculo
+            .attr("fill", "red"); // color del círculo
+
+        });
+    });
 }
