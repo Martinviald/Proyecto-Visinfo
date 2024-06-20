@@ -648,7 +648,7 @@ function generateMapGraph() {
 
             // 2. Crear una escala de color
             const colorScale = d3.scaleSequential()
-                .domain([0, d3.max(Object.values(earthquakeCounts))])
+                .domain([-5, d3.max(Object.values(earthquakeCounts))])
                 .interpolator(d3.interpolateReds);
 
             function drawLegend(SVG2, colorScale, earthquakeCounts) {
