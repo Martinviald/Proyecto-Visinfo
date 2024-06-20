@@ -1,7 +1,7 @@
 
 function fetchEarthquakeData() {
     const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/main/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYGIDRFUFPMVM6WDJGCZTUO7IQ";
-    return d3.csv(TERREMOTOS_URL, d3.autoType);
+    return d3.csv("chile_earthquakes.csv", d3.autoType);
 }
 
 const SVG1 = d3.select("#vis-1").append("svg");
@@ -602,8 +602,8 @@ function generateMapGraph() {
                 document.getElementById('BotonProfundidad').disabled = false;
             });
 
-            console.log("MapData:")
-            console.log(MapData);
+            // console.log("MapData:")
+            // console.log(MapData);
 
             // Define la transformación
             const proyeccion = d3.geoMercator()
