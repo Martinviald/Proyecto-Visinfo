@@ -10,7 +10,7 @@ const SVG2 = d3.select("#vis-2").append("svg");
 const WIDTH_VIS_1 = 858;
 const HEIGHT_VIS_1 = 400;
 
-const WIDTH_VIS_2 = 770;
+const WIDTH_VIS_2 = 700;
 const HEIGHT_VIS_2 = 1600;
 
 const MARGIN = {
@@ -350,6 +350,18 @@ function generateMapGraph() {
             .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
             .attr("r", 1.5) // radio del círculo
             .attr("fill", "red"); // color del círculo
+
+            // Agregamos una linea de largo "FocalDepth" para cada terremoto
+            SVG2
+            .selectAll("line")
+            .data(data)
+            .join("line")
+            .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
+            .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
+            .attr("x2", d => proyeccion([d.Longitude + d.FocalDepth, d.Latitude])[0])
+            .attr("y2", d => proyeccion([d.Longitude + d.FocalDepth, d.Latitude])[1])
+            .attr("stroke", "blue")
+            .attr("stroke-width", 0.5);
 
         });
     });
