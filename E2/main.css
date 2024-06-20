@@ -14,7 +14,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    width: 1350px;
     margin: 0 auto;
     background-color: #fff;
     border: 1px solid #ccc;
@@ -96,9 +96,19 @@ body {
 }
 
 #vis-2 {
-    width: 100%;
-    height: 500px; /* Ajusta según el tamaño de tus visualizaciones */
+    width: 1300px;
+    height: 700px; /* Ajusta según el tamaño de tus visualizaciones */
     border: 1px solid #ccc;
     border-radius: 5px;
     background-color: #f9f9f9;
+}
+
+.opaque {
+    opacity: 0.25;
+    /*Agregamos un borde negro*/
+    
+}
+
+.border {
+    border: 3px solid black;
 }

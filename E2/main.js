@@ -10,8 +10,12 @@ const SVG2 = d3.select("#vis-2").append("svg");
 const WIDTH_VIS_1 = 858;
 const HEIGHT_VIS_1 = 400;
 
-const WIDTH_VIS_2 = 700;
-const HEIGHT_VIS_2 = 1600;
+// const WIDTH_VIS_2 = 1330;
+// const HEIGHT_VIS_2 = 1600;
+
+const container = d3.select("#vis-2");
+const WIDTH_VIS_2 = +container.style("width").slice(0, -2);
+const HEIGHT_VIS_2 = +container.style("height").slice(0, -2);
 
 const MARGIN = {
     top: 20,
@@ -318,10 +322,20 @@ function generateMapGraph() {
     const EarthquakeData = fetchEarthquakeData();
 
     EarthquakeData.then(data => {
-        console.log("EarthquakeData:")
-        console.log(data);
+        // console.log("EarthquakeData:")
+        // console.log(data);
 
         d3.json("regiones_chile.json").then((MapData) => {
+
+            // Al inicio, deshabilita el botón de profundidad
+            document.getElementById('BotonProfundidad').disabled = true;
+
+            // Escucha el evento de clic en el botón de epicentros
+            document.getElementById('BotonEpicentros').addEventListener('click', function() {
+                // Habilita el botón de profundidad
+                document.getElementById('BotonProfundidad').disabled = false;
+            });
+
             console.log("MapData:")
             console.log(MapData);
 
@@ -329,39 +343,198 @@ function generateMapGraph() {
             const proyeccion = d3.geoMercator()
             .rotate([-25, 90]) // Rotamos el mapa 90 grados
             .fitSize([WIDTH_VIS_2, HEIGHT_VIS_2], MapData)
-            .center([0, -19])
-            // .translate([0, 0]);
+            .center([-23, 0])
+            // Hacemos una escala relativa al tamaño del contenedor
+            .scale(1.3*WIDTH_VIS_2);
 
             const caminosGeo = d3.geoPath().projection(proyeccion);
 
+            function calculateEarthquakes(data, MapData) {
+                // 1. Calcular la cantidad de terremotos en cada región
+                const earthquakeCounts = {};
+                const totalEarthquakes = data.length;
+                suma = 0;
+                data.forEach(d => {
+                    MapData.features.forEach(feature => {
+                        const [[minLong, minLat], [maxLong, maxLat]] = d3.geoBounds(feature);
+                        // console.log("bounds:");
+                        // console.log(minLong);
+                        if (d3.geoContains(feature, [d.Longitude, d.Latitude])) {
+                            if (!earthquakeCounts[feature.properties.Region]) {
+                                earthquakeCounts[feature.properties.Region] = 0;
+                            }
+                            earthquakeCounts[feature.properties.Region]++;
+                            suma++;
+                        } 
+                        else if (d.Latitude >= minLat && d.Latitude <= maxLat) {
+                            if (!earthquakeCounts[feature.properties.Region]) {
+                                earthquakeCounts[feature.properties.Region] = 0;
+                            }
+                            earthquakeCounts[feature.properties.Region]++;
+                            suma++;
+                        }
+                    });
+                });
+                return earthquakeCounts;
+            }
+
+            const earthquakeCounts = calculateEarthquakes(data, MapData);
+
+            // 2. Crear una escala de color
+            const colorScale = d3.scaleSequential()
+                .domain([0, d3.max(Object.values(earthquakeCounts))])
+                .interpolator(d3.interpolateReds);
+
+            function drawLegend(SVG2, colorScale, earthquakeCounts) {
+                // 1. Define un degradado en los "defs" del SVG
+                const defs = SVG2.append("defs");
+            
+                const gradient = defs.append("linearGradient")
+                    .attr("id", "gradient")
+                    .attr("gradientTransform", "rotate(90)");
+            
+                gradient.append("stop")
+                    .attr("offset", "0%")
+                    .attr("stop-color", colorScale(0));
+            
+                gradient.append("stop")
+                    .attr("offset", "100%")
+                    .attr("stop-color", colorScale(d3.max(Object.values(earthquakeCounts))));
+            
+                // 2. Dibuja un rectángulo y aplica el degradado
+                const legend = SVG2.append("rect")
+                    .attr("x", 20)
+                    .attr("y", 40)
+                    .attr("width", 20)
+                    .attr("height", 600) // Ajusta el tamaño según sea necesario
+                    .style("fill", "url(#gradient)");
+            
+                // 3. Agrega etiquetas de texto para los valores mínimo y máximo
+                SVG2.append("text")
+                    .attr("x", 50) // Ajusta la posición según sea necesario
+                    .attr("y", 20 + 20) // Alinea el texto con el borde superior del rectángulo
+                    .text(0);
+            
+                SVG2.append("text")
+                    .attr("x", 50) // Ajusta la posición según sea necesario
+                    .attr("y", 20 + 600 + 25) // Alinea el texto con el borde inferior del rectángulo
+                    .text(d3.max(Object.values(earthquakeCounts)));
+                
+                SVG2.append("text")
+                    .attr("x", 10) // Ajusta la posición según sea necesario
+                    .attr("y", 20) // Alinea el texto con el borde superior del rectángulo
+                    .text("Cantidad de terremotos");
+            }
+
+            drawLegend(SVG2, colorScale, earthquakeCounts);
+
+            // Calcular la suma total de terremotos
+            let totalEarthquakes = 0;
+            for (let region in earthquakeCounts) {
+                totalEarthquakes += earthquakeCounts[region];
+            }
+
+            // Establecer el nombre de la región y la cantidad de terremotos
+            d3.select('#region-name').text(`Chile`);
+            d3.select('#earthquake-count').text(`Cantidad total de terremotos: ${totalEarthquakes}`);
+            
             SVG2
             .selectAll("path")
             .data(MapData.features)
             .join("path")
             .attr("d", caminosGeo)
-            .attr("stroke", "#ccc");
+            .attr("stroke", "#ccc")
+            .attr("fill", d => colorScale(earthquakeCounts[d.properties.Region] || 0))
+            .on('click', function(event, d) {
+
+                d3.selectAll('path').classed('opaque', true);
+                d3.selectAll('path').classed('border', false);
+                
+                // Hacer la región clickeada, sus puntos y líneas completamente visibles
+                d3.select(this).classed('opaque', false);
+                d3.select(this).classed('border', true);
+                const data = d;
+            
+                // Actualizar el nombre de la región y la cantidad de terremotos
+                d3.select('#region-name').text(`${data.properties.Region}`);
+                d3.select('#earthquake-count').text(`Cantidad de terremotos: ${earthquakeCounts[data.properties.Region]}`);
+            })
+
+            // Crear un controlador de zoom
+            let zoom = d3.zoom()
+            .on('zoom', (event) => {
+                SVG2.attr('transform', event.transform);
+            });
+
+            // Aplicar el controlador de zoom al SVG
+            SVG2.call(zoom);
+
+            // Ajustar el punto central del evento de zoom
+            SVG2.on('mousedown', function(event) {
+            let coords = d3.pointer(event);
+            zoom.scaleBy(SVG2.transition().duration(650), 1.3, coords);
+            });
 
             // Agrega los puntos para cada terremoto
-            SVG2
-            .selectAll("circle")
-            .data(data)
-            .join("circle")
-            .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
-            .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
-            .attr("r", 1.5) // radio del círculo
-            .attr("fill", "red"); // color del círculo
+            function generarPuntos() {
+                SVG2
+                .selectAll("circle")
+                .data(data)
+                .enter() // selecciona solo los elementos que aún no existen
+                .append("circle") // agrega un nuevo círculo para cada elemento
+                .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
+                .attr("r", 1.5) // radio del círculo
+                .attr("fill", "green") // color del círculo
+                .attr("stroke", "black") // color del contorno
+                .attr("stroke-width", 0.5) // ancho del contorno
+                .attr("class", d => d.Region); // clase para agrupar por región
+
+            }
+
+            d3.select('#BotonEpicentros').on('click', generarPuntos);
 
             // Agregamos una linea de largo "FocalDepth" para cada terremoto
-            SVG2
-            .selectAll("line")
-            .data(data)
-            .join("line")
-            .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
-            .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
-            .attr("x2", d => proyeccion([d.Longitude + d.FocalDepth, d.Latitude])[0])
-            .attr("y2", d => proyeccion([d.Longitude + d.FocalDepth, d.Latitude])[1])
-            .attr("stroke", "blue")
-            .attr("stroke-width", 0.5);
+            function generarLineas() {
+                SVG2.selectAll("circle.end").remove();
+
+                SVG2
+                .selectAll("line")
+                .data(data)
+                .join("line")
+                .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
+                .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                .attr("stroke", "black")
+                .attr("stroke-width", 0.5)
+                .attr("class", d => d.Region)
+                .attr("stroke-dasharray", function() {
+                    const length = this.getTotalLength();
+                    return length + " " + length;
+                })
+                .attr("stroke-dashoffset", function() {
+                    return this.getTotalLength();
+                })
+                .transition()
+                .duration(2000)
+                .attr("stroke-dashoffset", 0);
+
+                setTimeout(function() {
+                    SVG2
+                    .selectAll("circle.end")
+                    .data(data)
+                    .enter() // selecciona solo los elementos que aún no existen
+                    .append("circle") // agrega un nuevo círculo para cada elemento
+                    .attr("class", "end")
+                    .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
+                    .attr("cy", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                    .attr("r", 1.5) // radio del círculo
+                    .attr("fill", "red"); // color del círculo
+                }, 2000);
+            }
+
+            d3.select('#BotonProfundidad').on('click', generarLineas);
 
         });
     });
