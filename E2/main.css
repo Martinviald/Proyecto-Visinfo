@@ -126,6 +126,18 @@ td {
     margin-right: 8px; /* Espacio entre el círculo y el texto */
 }
 
+.selected-point-data {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+
+
 /* Colores para cada magnitud (ajustar según necesidades) */
 .deaths-color {
     background-color: red; /* Color para Deaths */
