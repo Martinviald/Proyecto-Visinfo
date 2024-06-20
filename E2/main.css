@@ -71,7 +71,7 @@ body {
 
 /* Estilo específico para las visualizaciones */
 #vis-1 {
-    width: 100%;
+    width: 1180px;
     height: 400px; /* Ajusta según el tamaño de tus visualizaciones */
     border: 1px solid #ccc;
     border-radius: 5px;
