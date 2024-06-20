@@ -94,3 +94,75 @@ body {
 .filters button:hover {
     background-color: #e0e0e0;
 }
+
+/* Estilos para la leyenda */
+
+/* Estilos para la leyenda */
+
+.legend {
+    width: 90%;
+    margin: 20px auto; /* Centra la leyenda */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Para fusionar bordes de celdas */
+}
+
+td {
+    /* padding: 10px; */
+    text-align: center; /* Alineación central del contenido de las celdas */
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+}
+
+.legend-color {
+    width: 10px; /* Tamaño del círculo de color */
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px; /* Espacio entre el círculo y el texto */
+}
+
+.selected-point-data {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+
+
+/* Colores para cada magnitud (ajustar según necesidades) */
+.deaths-color {
+    background-color: red; /* Color para Deaths */
+}
+
+.missing-color {
+    background-color: yellowgreen; /* Color para Missing */
+}
+
+.injuries-color {
+    background-color: orange; /* Color para Injuries */
+}
+
+.economic-damage-color {
+    background-color: gray; /* Color para Economic Damage */
+}
+
+.houses-destroyed-color {
+    background-color: blue; /* Color para Houses Destroyed */
+}
+
+.houses-damaged-color {
+    background-color: green; /* Color para Houses Damaged */
+}
+
+.legend-label {
+    font-size: 14px; /* Tamaño de fuente para los nombres de las magnitudes */
+}
