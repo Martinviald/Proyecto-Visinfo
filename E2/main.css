@@ -70,7 +70,7 @@ body {
 }
 
 /* Estilo específico para las visualizaciones */
-#vis-1, #vis-2 {
+#vis-1 {
     width: 100%;
     height: 400px; /* Ajusta según el tamaño de tus visualizaciones */
     border: 1px solid #ccc;
@@ -165,4 +165,22 @@ td {
 
 .legend-label {
     font-size: 14px; /* Tamaño de fuente para los nombres de las magnitudes */
+}
+
+#vis-2 {
+    width: 1300px;
+    height: 700px; /* Ajusta según el tamaño de tus visualizaciones */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.opaque {
+    opacity: 0.25;
+    /*Agregamos un borde negro*/
+    
+}
+
+.border {
+    border: 3px solid black;
 }
