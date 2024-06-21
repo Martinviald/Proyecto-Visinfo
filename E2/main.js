@@ -741,21 +741,34 @@ function generateMapGraph() {
             zoom.scaleBy(SVG2.transition().duration(650), 1.3, coords);
             });
 
-            // Agrega los puntos para cada terremoto
-            function generarPuntos() {
-                SVG2
-                .selectAll("circle")
-                .data(data)
-                .enter() // selecciona solo los elementos que aún no existen
-                .append("circle") // agrega un nuevo círculo para cada elemento
-                .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
-                .attr("r", 1.5) // radio del círculo
-                .attr("fill", "green") // color del círculo
-                .attr("stroke", "black") // color del contorno
-                .attr("stroke-width", 0.5) // ancho del contorno
-                .attr("class", d => d.Region); // clase para agrupar por región
+            // Variable para rastrear la visibilidad de los puntos
+            let puntosVisibles = false;
 
+            function generarPuntos() {
+                if (!puntosVisibles) {
+                    // Agrega los puntos si no están visibles
+                    SVG2.selectAll("circle")
+                        .data(data)
+                        .enter()
+                        .append("circle")
+                        .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
+                        .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
+                        .attr("r", 1.5)
+                        .attr("fill", "green")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", 0.5)
+                        .attr("class", d => d.Region);
+                    puntosVisibles = true; // Actualiza la bandera
+                    d3.select('#BotonEpicentros').text('Ocultar epicentros');
+                } else {
+                    d3.select('#BotonEpicentros').text('Mostrar epicentros');
+                    // Elimina los puntos si están visibles
+                    SVG2.selectAll("circle").remove();
+                    SVG2.selectAll("circle.end").remove();
+                    SVG2.selectAll("line").remove();
+                    puntosVisibles = false; // Actualiza la bandera
+                    d3.select('#BotonProfundidad').attr('disabled', !puntosVisibles);
+                }
             }
 
             d3.select('#BotonEpicentros').on('click', generarPuntos);
