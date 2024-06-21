@@ -728,17 +728,37 @@ function generateMapGraph() {
 
             // Crear un controlador de zoom
             let zoom = d3.zoom()
-                .scaleExtent([0.5, 32])
+                .scaleExtent([0.5, 5])
                 .on("zoom", zoomed);
 
             // Aplicar el controlador de zoom al SVG
             SVG2.call(zoom);
 
+            // Variable para rastrear el nivel de zoom actual
+            let currentZoom = d3.zoomIdentity;
+
             function zoomed(event) {
+                currentZoom = event.transform;
+                // console.log(currentZoom);
                 // Aplica el zoom a todos los elementos dentro del SVG que desees que sean afectados por el zoom.
                 // Por ejemplo, si tienes un grupo 'g' que contiene todos los elementos de tu mapa, puedes aplicar el zoom a ese grupo.
-                SVG2.selectAll('path, circle, line') // Asegúrate de seleccionar todos los elementos que quieras que respondan al zoom
-                    .attr('transform', event.transform);
+                SVG2.selectAll('path') // Asegúrate de seleccionar todos los elementos que quieras que respondan al zoom
+                    .attr('transform', currentZoom);
+
+                SVG2.selectAll('circle')
+                    .attr('cx', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                    .attr('cy', d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
+                    .attr('r', 1.5 * currentZoom.k);
+                
+                    SVG2.selectAll('circle.end')
+                    .remove();
+
+                SVG2.selectAll('line')
+                    .remove();
+                    // .attr('x1', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                    // .attr('y1', d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
+                    // .attr('x2', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                    // .attr('y2', d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]));
             }
 
             // Variable para rastrear la visibilidad de los puntos
@@ -751,8 +771,8 @@ function generateMapGraph() {
                         .data(data)
                         .enter()
                         .append("circle")
-                        .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
-                        .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
+                        .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                        .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
                         .attr("r", 1.5)
                         .attr("fill", "green")
                         .attr("stroke", "black")
@@ -781,10 +801,10 @@ function generateMapGraph() {
                 .selectAll("line")
                 .data(data)
                 .join("line")
-                .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
-                .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                .attr("x1", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                .attr("y1", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
+                .attr("x2", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                .attr("y2", d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]))
                 .attr("stroke", "black")
                 .attr("stroke-width", 0.5)
                 .attr("class", d => d.Region)
@@ -806,8 +826,8 @@ function generateMapGraph() {
                     .enter() // selecciona solo los elementos que aún no existen
                     .append("circle") // agrega un nuevo círculo para cada elemento
                     .attr("class", "end")
-                    .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
-                    .attr("cy", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                    .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0])) // coordenada x
+                    .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])) // coordenada y
                     .attr("r", 1.5) // radio del círculo
                     .attr("fill", "red"); // color del círculo
                 }, 2000);
