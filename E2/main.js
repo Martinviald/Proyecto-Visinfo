@@ -728,18 +728,18 @@ function generateMapGraph() {
 
             // Crear un controlador de zoom
             let zoom = d3.zoom()
-            .on('zoom', (event) => {
-                SVG2.attr('transform', event.transform);
-            });
+                .scaleExtent([0.5, 32])
+                .on("zoom", zoomed);
 
             // Aplicar el controlador de zoom al SVG
             SVG2.call(zoom);
 
-            // Ajustar el punto central del evento de zoom
-            SVG2.on('mousedown', function(event) {
-            let coords = d3.pointer(event);
-            zoom.scaleBy(SVG2.transition().duration(650), 1.3, coords);
-            });
+            function zoomed(event) {
+                // Aplica el zoom a todos los elementos dentro del SVG que desees que sean afectados por el zoom.
+                // Por ejemplo, si tienes un grupo 'g' que contiene todos los elementos de tu mapa, puedes aplicar el zoom a ese grupo.
+                SVG2.selectAll('path, circle, line') // Asegúrate de seleccionar todos los elementos que quieras que respondan al zoom
+                    .attr('transform', event.transform);
+            }
 
             // Variable para rastrear la visibilidad de los puntos
             let puntosVisibles = false;
