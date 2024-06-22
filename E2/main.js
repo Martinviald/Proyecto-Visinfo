@@ -626,23 +626,42 @@ function generateMapGraph() {
                         // console.log("bounds:");
                         // console.log(minLong);
                         if (d3.geoContains(feature, [d.Longitude, d.Latitude])) {
-                            if (!earthquakeCounts[feature.properties.Region]) {
+                            if (!earthquakeCounts[feature.properties.Region] || earthquakeCounts[feature.properties.Region] === 0) {
+                                // console.log(feature.properties.Region);
                                 earthquakeCounts[feature.properties.Region] = 0;
                             }
+                            // Agregamos un atributo "Region" al objeto "d" para poder filtrar los terremotos por región
+                            d.Region = feature.properties.Region;
+                            // console.log(d.Region);
                             earthquakeCounts[feature.properties.Region]++;
                             suma++;
                         } 
                         else if (d.Latitude >= minLat && d.Latitude <= maxLat) {
                             if (!earthquakeCounts[feature.properties.Region]) {
-                                earthquakeCounts[feature.properties.Region] = 0;
+                                if (earthquakeCounts[feature.properties.Region] != 0) {
+                                    // console.log(feature.properties.Region);
+                                    earthquakeCounts[feature.properties.Region] = 0;
+                                    // console.log(earthquakeCounts[feature.properties.Region]);
+                                }
                             }
-                            earthquakeCounts[feature.properties.Region]++;
-                            suma++;
+                            if (!d.Region) {
+                                d.Region = feature.properties.Region;
+                                earthquakeCounts[feature.properties.Region]++;
+                                suma++;
+                            }
                         }
                     });
                 });
-                return earthquakeCounts;
+            MapData.features.forEach(feature => {
+                if (!earthquakeCounts[feature.properties.Region]) {
+                    earthquakeCounts[feature.properties.Region] = 0;
+                }
+            });
+            // console.log("suma:");
+            // console.log(suma);
+            return earthquakeCounts;
             }
+
 
             const earthquakeCounts = calculateEarthquakes(data, MapData);
 
@@ -703,7 +722,7 @@ function generateMapGraph() {
             // Establecer el nombre de la región y la cantidad de terremotos
             d3.select('#region-name').text(`Chile`);
             d3.select('#earthquake-count').text(`Cantidad total de terremotos: ${totalEarthquakes}`);
-            
+
             SVG2
             .selectAll("path")
             .data(MapData.features)
@@ -720,6 +739,22 @@ function generateMapGraph() {
                 d3.select(this).classed('opaque', false);
                 d3.select(this).classed('border', true);
                 const data = d;
+
+                    // Opacar todos los círculos que no pertenecen a la región clickeada
+                d3.selectAll('circle')
+                .classed('opaque', function(d) { 
+                    return d.Region !== data.properties.Region; 
+                });
+
+                d3.selectAll('circle.end')
+                .classed('opaque', function(d) { 
+                    return d.Region !== data.properties.Region; 
+                });
+                
+                d3.selectAll('line')
+                .classed('opaque', function(d) { 
+                    return d.Region !== data.properties.Region; 
+                });
             
                 // Actualizar el nombre de la región y la cantidad de terremotos
                 d3.select('#region-name').text(`${data.properties.Region}`);
@@ -750,16 +785,18 @@ function generateMapGraph() {
                     .attr('cy', d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
                     .attr('r', 1.5 * currentZoom.k);
                 
-                    SVG2.selectAll('circle.end')
-                    .remove();
+                SVG2.selectAll('circle.end')
+                    // .remove();
+                    .attr('cx', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                    .attr('cy', d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]))
+                    .attr('r', 1.5 * currentZoom.k);
 
                 SVG2.selectAll('line')
-                    .remove();
-                    // .attr('x1', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
-                    // .attr('y1', d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
-                    // .attr('x2', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
-                    // .attr('y2', d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]));
+                    .attr("transform", currentZoom);
+                    
             }
+
+
 
             // Variable para rastrear la visibilidad de los puntos
             let puntosVisibles = false;
@@ -771,13 +808,13 @@ function generateMapGraph() {
                         .data(data)
                         .enter()
                         .append("circle")
-                        .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
-                        .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
-                        .attr("r", 1.5)
+                        .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0])) // coordenada x
+                        .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1])) // coordenada y
+                        .attr("r", 1.5*currentZoom.k) // radio del círculo
                         .attr("fill", "green")
                         .attr("stroke", "black")
                         .attr("stroke-width", 0.5)
-                        .attr("class", d => d.Region);
+                        .attr("class", d => d.Region)
                     puntosVisibles = true; // Actualiza la bandera
                     d3.select('#BotonEpicentros').text('Ocultar epicentros');
                 } else {
@@ -801,10 +838,11 @@ function generateMapGraph() {
                 .selectAll("line")
                 .data(data)
                 .join("line")
-                .attr("x1", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
-                .attr("y1", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
-                .attr("x2", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
-                .attr("y2", d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]))
+                .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
+                .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                .attr("transform", currentZoom)
                 .attr("stroke", "black")
                 .attr("stroke-width", 0.5)
                 .attr("class", d => d.Region)
@@ -828,7 +866,7 @@ function generateMapGraph() {
                     .attr("class", "end")
                     .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0])) // coordenada x
                     .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])) // coordenada y
-                    .attr("r", 1.5) // radio del círculo
+                    .attr("r", 1.5*currentZoom.k) // radio del círculo
                     .attr("fill", "red"); // color del círculo
                 }, 2000);
             }
