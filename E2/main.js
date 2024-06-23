@@ -815,6 +815,45 @@ function generateMapGraph() {
                         .attr("stroke", "black")
                         .attr("stroke-width", 0.5)
                         .attr("class", d => d.Region)
+                        .on("mouseover", (event, d) => {
+                            // console.log("Datos del terremoto:", d);
+                            SVG2.selectAll("circle")
+                                .attr("opacity", dat => dat === d ? 1 : 0.5)
+                                .attr("r", dat => dat === d ? 5 : 1.5*currentZoom.k);
+                        
+                            // Selecciona cada <span> por su ID y actualiza su contenido
+                            d3.select("#year2").text(d.Year);
+                            d3.select("#month2").text(d.Month);
+                            d3.select("#day2").text(d.Day); // Corregido el ID aquí
+                            d3.select("#location2").text(d.LocationName);
+                            d3.select("#magnitude2").text(d.Magnitude);
+                            d3.select("#damage2").text(d.Damage);
+                            d3.select("#deaths2").text(d.Deaths);
+                            d3.select("#missing2").text(d.Missing);
+                            d3.select("#injuries2").text(d.Injuries);
+                            d3.select("#housesDes2").text(d.HousesDestroyed);
+                            d3.select("#housesDam2").text(d.HousesDamaged);
+                            
+                        })
+                        .on("mouseleave", (evento, d) => {
+                            // terremotos.attr("opacity", 1);
+                            // terremotos.attr("r", 2);
+                            SVG2.selectAll("circle")
+                                .attr("opacity", 1)
+                                .attr("r", 1.5*currentZoom.k);
+                        
+                            d3.select("#year2").text("");
+                            d3.select("#month2").text("");
+                            d3.select("#day2").text("");
+                            d3.select("#location2").text("");
+                            d3.select("#magnitude2").text("");
+                            d3.select("#damage2").text("");
+                            d3.select("#deaths2").text("");
+                            d3.select("#missing2").text("");
+                            d3.select("#injuries2").text("");
+                            d3.select("#housesDes2").text("");
+                            d3.select("#housesDam2").text("");
+                        });;
                     puntosVisibles = true; // Actualiza la bandera
                     d3.select('#BotonEpicentros').text('Ocultar epicentros');
                 } else {
@@ -872,6 +911,13 @@ function generateMapGraph() {
             }
 
             d3.select('#BotonProfundidad').on('click', generarLineas);
+
+            const terremotos = SVG2.selectAll("circle");
+
+            terremotos.on("mouseover", (event, d) => {
+                console.log("Datos del terremoto:", d);
+                // El resto del código para manejar la interacción visual aquí
+            });
 
         });
     });
