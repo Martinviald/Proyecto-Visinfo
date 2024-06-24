@@ -1,7 +1,7 @@
 
 function fetchEarthquakeData() {
-    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/main/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTVPHYGIDRFUFPMVM6WDJGCZTUO7IQ";
-    return d3.csv("chile_earthquakes.csv", d3.autoType);
+    const TERREMOTOS_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/main/E2/chile_earthquakes.csv?token=GHSAT0AAAAAACTS6A5O56IMGJ4KMRL24HROZTZ7X4A";
+    return d3.csv(TERREMOTOS_URL, d3.autoType);
 }
 
 const SVG1 = d3.select("#vis-1").append("svg");
@@ -66,7 +66,7 @@ d3.selectAll(".magnitudeFilterButton").on("click", function() {
     }
 
     generateEarthquakeImpactGraphs(filteredData);
-    console.log(filteredData);
+    // console.log(filteredData);
 });
 
 function filtrarVis1(region) {
@@ -75,7 +75,7 @@ function filtrarVis1(region) {
 
 
 function generateEarthquakeImpactGraphs(data) {
-    console.log("data filtrada por region: ", data);
+    // console.log("data filtrada por region: ", data);
     data.sort((a, b) => a.Year - b.Year);
 
     // ESCALAS
@@ -225,9 +225,9 @@ function generateEarthquakeImpactGraphs(data) {
     .join(
         enter => {
             const CASITA = enter.append("g").attr("class", "casita").style("opacity", 0);
-            console.log("ENTER");
-            console.log(CASITA);
-            console.log("ENTER");
+            // console.log("ENTER");
+            // console.log(CASITA);
+            // console.log("ENTER");
 
             CASITA.append("circle")
                 .attr("class", "Deaths")
@@ -520,15 +520,15 @@ function generateEarthquakeImpactGraphs(data) {
     )
 
     // Crear tooltip vacío con clase "tooltip". En el CSS está todo lo necesario
-    // let tooltip = d3.select("body").append("div")
-    //     .style("opacity", 0)
-    //     .style("width", 200)
-    //     .style("height", 50)
-    //     .style("pointer-events", "none")
-    //     .style("background", "rgb(117, 168, 234)")
-    //     .style("border-radius", "8px")
-    //     .style("padding", "4px")
-    //     .style("position", "absolute");
+    let tooltip = d3.select("body").append("div")
+        .style("opacity", 0)
+        .style("width", 200)
+        .style("height", 50)
+        .style("pointer-events", "none")
+        .style("background", "rgb(117, 168, 234)")
+        .style("border-radius", "8px")
+        .style("padding", "4px")
+        .style("position", "absolute");
 
     // Seleccionar todos los puntos
     const puntos = SVG1.selectAll(".casita").selectAll("circle");
@@ -606,10 +606,12 @@ function generateMapGraph() {
     const EarthquakeData = fetchEarthquakeData();
 
     EarthquakeData.then(data => {
-        console.log("EarthquakeData:")
-        console.log(data);
+        // console.log("EarthquakeData:")
+        // console.log(data);
 
-        d3.json("regiones_chile.json").then((MapData) => {
+        REGIONES_URL = "https://raw.githubusercontent.com/Martinviald/Proyecto-Visinfo/main/E2/regiones_chile.json?token=GHSAT0AAAAAACTS6A5PKS3V2OY347SPBLSQZTZ7YJA";
+
+        d3.json(REGIONES_URL).then((MapData) => {
 
             // Al inicio, deshabilita el botón de profundidad
             document.getElementById('BotonProfundidad').disabled = true;
@@ -670,6 +672,7 @@ function generateMapGraph() {
                         }
                     });
                 });
+
             MapData.features.forEach(feature => {
                 if (!earthquakeCounts[feature.properties.Region]) {
                     earthquakeCounts[feature.properties.Region] = 0;
@@ -742,6 +745,7 @@ function generateMapGraph() {
             d3.select('#earthquake-count').text(`Cantidad total de terremotos: ${totalEarthquakes}`);
 
             var profundidadVisible = false;
+            var puntosVisibles = false;
 
             SVG2
             .selectAll("path")
@@ -777,16 +781,8 @@ function generateMapGraph() {
                             }
                             return d.Region !== data.properties.Region ? 0.5 : 1; 
                         });
-                } else {
-                    d3.selectAll('circle:not(#end)')
-                        .style('opacity', function(d) { 
-                            if (d.Region !== data.properties.Region) {
-                            } else {
-                                dataFiltrada[cont] = d;
-                                cont += 1;
-                            }
-                        });
                 }
+
                 generateEarthquakeImpactGraphs(dataFiltrada);
 
                 if (!profundidadVisible) {
@@ -795,15 +791,20 @@ function generateMapGraph() {
                 }
 
                 if (profundidadVisible) {
-                    d3.selectAll('circle.end')
-                    .style('opacity', function(d) { 
-                        return d.Region !== data.properties.Region ? 0.5 : 1; 
-                    });
-            
-                d3.selectAll('line')
-                    .style('opacity', function(d) { 
-                        return d.Region !== data.properties.Region ? 0.5 : 1; 
-                    });
+                    try {
+                            d3.selectAll('circle.end')
+                        .style('opacity', function(d) { 
+                            // console.log("d:")
+                            // console.log(d)
+                            return d.Region !== data.properties.Region ? 0.5 : 1; 
+                        });
+
+                        d3.selectAll('line')
+                        .style('opacity', function(d) { 
+                            return d.properties.Region !== data.properties.Region ? 0.5 : 1; 
+                        });
+                    } catch (error) {
+                    }
                 }
             
                 // Actualizar el nombre de la región y la cantidad de terremotos
@@ -910,8 +911,6 @@ function generateMapGraph() {
                             d3.select("#housesDam2").text("");
                 });
 
-            // Variable para rastrear la visibilidad de los puntos
-            let puntosVisibles = false;
 
             function generarPuntos() {
                 if (!puntosVisibles) {
