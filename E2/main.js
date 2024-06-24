@@ -786,7 +786,6 @@ function generateMapGraph() {
                     .attr('r', 1.5 * currentZoom.k);
                 
                 SVG2.selectAll('circle.end')
-                    // .remove();
                     .attr('cx', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
                     .attr('cy', d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]))
                     .attr('r', 1.5 * currentZoom.k);
@@ -796,49 +795,41 @@ function generateMapGraph() {
                     
             }
 
-
-
-            // Variable para rastrear la visibilidad de los puntos
-            let puntosVisibles = false;
-
-            function generarPuntos() {
-                if (!puntosVisibles) {
-                    // Agrega los puntos si no están visibles
+            // Creamos los círculos
+            SVG2.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
+                .attr("r", 1.5*currentZoom.k)
+                .attr("fill", "green")
+                .attr("stroke", "black")
+                .attr("stroke-width", 0.5)
+                .attr("class", d => d.Region)
+                .style("opacity", 0)
+                .on("mouseover", (event, d) => {
+                    // console.log("Datos del terremoto:", d);
                     SVG2.selectAll("circle")
-                        .data(data)
-                        .enter()
-                        .append("circle")
-                        .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0])) // coordenada x
-                        .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1])) // coordenada y
-                        .attr("r", 1.5*currentZoom.k) // radio del círculo
-                        .attr("fill", "green")
-                        .attr("stroke", "black")
-                        .attr("stroke-width", 0.5)
-                        .attr("class", d => d.Region)
-                        .on("mouseover", (event, d) => {
-                            // console.log("Datos del terremoto:", d);
-                            SVG2.selectAll("circle")
-                                .attr("opacity", dat => dat === d ? 1 : 0.5)
-                                .attr("r", dat => dat === d ? 5 : 1.5*currentZoom.k);
-                        
-                            // Selecciona cada <span> por su ID y actualiza su contenido
-                            d3.select("#year2").text(d.Year);
-                            d3.select("#month2").text(d.Month);
-                            d3.select("#day2").text(d.Day); // Corregido el ID aquí
-                            d3.select("#location2").text(d.LocationName);
-                            d3.select("#magnitude2").text(d.Magnitude);
-                            d3.select("#damage2").text(d.Damage);
-                            d3.select("#deaths2").text(d.Deaths);
-                            d3.select("#missing2").text(d.Missing);
-                            d3.select("#injuries2").text(d.Injuries);
-                            d3.select("#housesDes2").text(d.HousesDestroyed);
-                            d3.select("#housesDam2").text(d.HousesDamaged);
-                            
-                        })
-                        .on("mouseleave", (evento, d) => {
-                            // terremotos.attr("opacity", 1);
-                            // terremotos.attr("r", 2);
-                            SVG2.selectAll("circle")
+                    .attr("opacity", dat => dat === d ? 1 : 0.5)
+                    .attr("r", dat => dat === d ? 5 : 1.5*currentZoom.k);
+            
+                    // Selecciona cada <span> por su ID y actualiza su contenido
+                    d3.select("#year2").text(d.Year);
+                    d3.select("#month2").text(d.Month);
+                    d3.select("#day2").text(d.Day); // Corregido el ID aquí
+                    d3.select("#location2").text(d.LocationName);
+                    d3.select("#magnitude2").text(d.Magnitude);
+                    d3.select("#damage2").text(d.Damage);
+                    d3.select("#deaths2").text(d.Deaths);
+                    d3.select("#missing2").text(d.Missing);
+                    d3.select("#injuries2").text(d.Injuries);
+                    d3.select("#housesDes2").text(d.HousesDestroyed);
+                    d3.select("#housesDam2").text(d.HousesDamaged);
+                })
+                .on("mouseleave", (evento, d) => {
+                    // Evento mouseleave
+                    SVG2.selectAll("circle")
                                 .attr("opacity", 1)
                                 .attr("r", 1.5*currentZoom.k);
                         
@@ -853,71 +844,86 @@ function generateMapGraph() {
                             d3.select("#injuries2").text("");
                             d3.select("#housesDes2").text("");
                             d3.select("#housesDam2").text("");
-                        });;
+                });
+
+            // Variable para rastrear la visibilidad de los puntos
+            let puntosVisibles = false;
+
+            function generarPuntos() {
+                if (!puntosVisibles) {
+                    SVG2.selectAll("circle").style("opacity", 1);
+                    SVG2.selectAll("circle.end").style("opacity", 0);
                     puntosVisibles = true; // Actualiza la bandera
                     d3.select('#BotonEpicentros').text('Ocultar epicentros');
                 } else {
                     d3.select('#BotonEpicentros').text('Mostrar epicentros');
-                    // Elimina los puntos si están visibles
-                    SVG2.selectAll("circle").remove();
-                    SVG2.selectAll("circle.end").remove();
-                    SVG2.selectAll("line").remove();
+                    // Oculta los puntos si están visibles
+                    SVG2.selectAll("circle").style("opacity", 0);
+                    SVG2.selectAll("circle.end").style("opacity", 0);
+                    SVG2.selectAll("line").style("opacity", 0);
                     puntosVisibles = false; // Actualiza la bandera
                     d3.select('#BotonProfundidad').attr('disabled', !puntosVisibles);
                 }
             }
 
             d3.select('#BotonEpicentros').on('click', generarPuntos);
+            SVG2.selectAll("line")
+            .data(data)
+            .join("line")
+            .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
+            .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
+            .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
+            .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+            .attr("transform", currentZoom)
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.5)
+            .attr("class", d => d.Region)
+            .attr("stroke-dasharray", function() {
+                const length = this.getTotalLength();
+                return length + " " + length;
+            })
+            .attr("stroke-dashoffset", function() {
+                return this.getTotalLength();
+            });
 
-            // Agregamos una linea de largo "FocalDepth" para cada terremoto
-            function generarLineas() {
-                SVG2.selectAll("circle.end").remove();
-
-                SVG2
-                .selectAll("line")
+            // Crear círculos
+            SVG2.selectAll("circle.end")
                 .data(data)
-                .join("line")
-                .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
-                .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
-                .attr("transform", currentZoom)
-                .attr("stroke", "black")
-                .attr("stroke-width", 0.5)
-                .attr("class", d => d.Region)
-                .attr("stroke-dasharray", function() {
-                    const length = this.getTotalLength();
-                    return length + " " + length;
-                })
-                .attr("stroke-dashoffset", function() {
-                    return this.getTotalLength();
-                })
-                .transition()
-                .duration(2000)
-                .attr("stroke-dashoffset", 0);
-
-                setTimeout(function() {
-                    SVG2
-                    .selectAll("circle.end")
-                    .data(data)
-                    .enter() // selecciona solo los elementos que aún no existen
-                    .append("circle") // agrega un nuevo círculo para cada elemento
-                    .attr("class", "end")
-                    .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0])) // coordenada x
-                    .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])) // coordenada y
-                    .attr("r", 1.5*currentZoom.k) // radio del círculo
-                    .attr("fill", "red"); // color del círculo
-                }, 2000);
-            }
+                .enter()
+                .append("circle")
+                .attr("class", "end")
+                .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("cy", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                .attr("r", 1.5)
+                .attr("fill", "red")
+                .style("opacity", 0); // Inicialmente invisibles
+            
+                function generarLineas() {
+                    // Restablecer stroke-dasharray y stroke-dashoffset antes de la transición
+                    SVG2.selectAll("line")
+                        .attr("stroke-dasharray", function() {
+                            return this.getTotalLength();
+                        })
+                        .attr("stroke-dashoffset", function() {
+                            return this.getTotalLength();
+                        })
+                        .style("opacity", 0)
+                        .transition()
+                        .duration(2000)
+                        .attr("stroke-dashoffset", 0)
+                        .style("opacity", 1);
+                
+                    SVG2.selectAll("circle.end")
+                            .style("opacity", 0);
+                
+                    // Aplicar transición a los círculos después del timeout
+                    setTimeout(function() {
+                        SVG2.selectAll("circle.end")
+                            .style("opacity", 1); // Hacerlos visibles
+                    }, 2000);
+                }
 
             d3.select('#BotonProfundidad').on('click', generarLineas);
-
-            const terremotos = SVG2.selectAll("circle");
-
-            terremotos.on("mouseover", (event, d) => {
-                console.log("Datos del terremoto:", d);
-                // El resto del código para manejar la interacción visual aquí
-            });
 
         });
     });
