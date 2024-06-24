@@ -867,6 +867,7 @@ function generateMapGraph() {
             }
 
             d3.select('#BotonEpicentros').on('click', generarPuntos);
+
             SVG2.selectAll("line")
             .data(data)
             .join("line")
