@@ -771,36 +771,6 @@ function generateMapGraph() {
                 d3.select('#region-name').text(`${data.properties.Region}`);
                 d3.select('#earthquake-count').text(`Cantidad de terremotos: ${earthquakeCounts[data.properties.Region]}`);
             })
-            // .on('click', function(event, d) {
-
-            //     d3.selectAll('path').classed('opaque', true);
-            //     d3.selectAll('path').classed('border', false);
-                
-            //     // Hacer la región clickeada, sus puntos y líneas completamente visibles
-            //     d3.select(this).classed('opaque', false);
-            //     d3.select(this).classed('border', true);
-            //     const data = d;
-
-            //         // Opacar todos los círculos que no pertenecen a la región clickeada
-            //     d3.selectAll('circle')
-            //     .classed('opaque', function(d) { 
-            //         return d.Region !== data.properties.Region; 
-            //     });
-
-            //     d3.selectAll('circle.end')
-            //     .classed('opaque', function(d) { 
-            //         return d.Region !== data.properties.Region; 
-            //     });
-                
-            //     d3.selectAll('line')
-            //     .classed('opaque', function(d) { 
-            //         return d.Region !== data.properties.Region; 
-            //     });
-            
-            //     // Actualizar el nombre de la región y la cantidad de terremotos
-            //     d3.select('#region-name').text(`${data.properties.Region}`);
-            //     d3.select('#earthquake-count').text(`Cantidad de terremotos: ${earthquakeCounts[data.properties.Region]}`);
-            // })
 
 
             // Crear un controlador de zoom
@@ -834,6 +804,19 @@ function generateMapGraph() {
 
                 SVG2.selectAll('line')
                     .attr("transform", currentZoom);
+
+                ejeY.selectAll('.scale-text')
+                    .attr('x', currentZoom.applyX(WIDTH_VIS_2 - 50)) // Ejemplo de ajuste en x basado en el zoom
+                    .attr('y', function(d) {
+                        // Aquí necesitas ajustar el cálculo de 'y' basado en tu lógica específica y el zoom
+                        var baseY = 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1];
+                        var adjustment = this.textContent === "0" ? 5 : this.textContent === "10 Km" ? proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13 : 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13;
+                        return currentZoom.applyY(baseY + adjustment); // Ajuste en y basado en el zoom
+                    });
+
+                ejeY.selectAll('.axis-label')
+                    .attr('x', currentZoom.applyX( WIDTH_VIS_2 - 50)) // Ajuste en x basado en el zoom
+                    .attr('y', currentZoom.applyY(150 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 5)); // Ajuste en y basado en el zoom
                     
             }
 
@@ -903,7 +886,7 @@ function generateMapGraph() {
                     // Oculta los puntos si están visibles
                     SVG2.selectAll("circle").style("opacity", 0);
                     SVG2.selectAll("circle.end").style("opacity", 0);
-                    SVG2.selectAll("line").style("opacity", 0);
+                    SVG2.selectAll("line:not(.scale-line)").style("opacity", 0);
                     profundidadVisible = false;
                     puntosVisibles = false; // Actualiza la bandera
                     d3.select('#BotonProfundidad').attr('disabled', !puntosVisibles);
@@ -945,7 +928,7 @@ function generateMapGraph() {
 
                 function generarLineas() {
                     // Restablecer stroke-dasharray y stroke-dashoffset antes de la transición
-                    SVG2.selectAll("line")
+                    SVG2.selectAll("line:not(.scale-line)")
                         .attr("stroke-dasharray", function() {
                             return this.getTotalLength();
                         })
@@ -970,6 +953,80 @@ function generateMapGraph() {
                 }
 
             d3.select('#BotonProfundidad').on('click', generarLineas);
+
+            // Buscamos toda la información del punto con el mayor focalDepth
+            const maxFocalDepth = data.reduce((max, current) => {
+                return current.FocalDepth > max.FocalDepth ? current : max;
+            });
+
+            // Creamos un contenedor para la escala
+            let ejeY = SVG2.append("g")
+                .attr("class", "scale");
+
+            // Creamos una línea de escala del largo maxfocalDepth
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 60)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1])
+                .attr("x2", d => WIDTH_VIS_2 - 60)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("stroke", "black");
+            
+            // Le agregamos una línea horizontal al incio con el número 0 y otra al final con el número maxFocalDepth
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 50 - 15)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1])
+                .attr("x2", d => WIDTH_VIS_2 - 50 - 5)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1])
+                .attr("stroke", "black");
+
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 50 - 15)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("x2", d => WIDTH_VIS_2 - 50 - 5)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("stroke", "black");
+            
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 50 - 15)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("x2", d => WIDTH_VIS_2 - 50 - 5)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("stroke", "black");
+
+            
+            // Agregamos el texto 0
+            ejeY.append("text")
+                .attr("class", "axis-label")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 150 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 5)
+                .attr("text-anchor", "end")
+                .text("Escala de profundidad (Km)");
+
+            // Agregamos el texto 0
+            ejeY.append("text")
+                .attr("class", "scale-text")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 5)
+                .text("0");
+
+            // Agregamos el texto maxFocalDepth
+            ejeY.append("text")
+                .attr("class", "scale-text")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .text("10 Km");
+            
+            ejeY.append("text")
+                .attr("class", "scale-text")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .text("20 Km");
+            
+            
 
         });
     });
