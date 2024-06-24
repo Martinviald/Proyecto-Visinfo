@@ -192,6 +192,31 @@ function generateEarthquakeImpactGraphs(data) {
     .attr("stroke", escalaColorCategorica3(1))
     .call(ejeY32);
 
+    // Definir la función de línea
+    const linea1 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaDeaths(d.Deaths));
+
+    const linea2 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaInjuries(d.Missing));
+
+    const linea3 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaInjuries(d.Injuries));
+
+    const linea4 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaDamage(d.Damage));
+    
+    const linea5 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaHousesDestroyed(d.HousesDestroyed));
+
+    const linea6 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaHousesDamaged(d.HousesDamaged));
+
 
     // CREAMOS LA VISUALIZACIÓN
     contenedor1
@@ -224,19 +249,6 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("r", 2)
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaInjuries(d.Injuries));
-
-            // Definir la función de línea
-            const linea1 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaDeaths(d.Deaths));
-
-            const linea2 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaInjuries(d.Missing));
-
-            const linea3 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaInjuries(d.Injuries));
 
             // Agregar la línea al contenedor
             CASITA.append("path")
@@ -279,6 +291,7 @@ function generateEarthquakeImpactGraphs(data) {
             contenedor1.selectAll(".ejeY1").attr("transform", `translate(${0}, ${0})`);
             contenedor1.selectAll(".ejeY2").call(ejeY12);
             contenedor1.selectAll(".ejeY2").attr("transform", `translate(${WIDTHVIS_VIS_1/4}, ${0})`)
+            
 
             // console.log(update);
             // const CASITA = update.selectAll(".casita");
@@ -323,19 +336,7 @@ function generateEarthquakeImpactGraphs(data) {
                 return cy;
             })
             
-            // Actualizar líneas
-            const linea1 = d3.line()
-                .x(d => escalaX(d.Year))
-                .y(d => escalaDeaths(d.Deaths));
-
-            const linea2 = d3.line()
-                .x(d => escalaX(d.Year))
-                .y(d => escalaInjuries(d.Missing));
-
-            const linea3 = d3.line()
-                .x(d => escalaX(d.Year))
-                .y(d => escalaInjuries(d.Injuries));
-
+            // Actualizar Lineas
             update.selectAll(".line-Deaths").transition("nuevaPos11")
             .duration(1000)
                 .attr("d", linea1);
@@ -370,10 +371,6 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("r", 2)
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaDamage(d.Damage));
-            
-            const linea4 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaDamage(d.Damage));
         
             CASITA.append("path")
             .datum(data)
@@ -416,10 +413,6 @@ function generateEarthquakeImpactGraphs(data) {
             })
 
             // Actualizar lineas
-            const linea4 = d3.line()
-                .x(d => escalaX(d.Year))
-                .y(d => escalaDamage(d.Damage));
-
             update.selectAll(".line-EconomicDamage").transition("nuevaPos212")
             .duration(1000)
                 .attr("d", linea4);
@@ -453,14 +446,6 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("r", 2)
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaHousesDamaged(d.HousesDamaged));
-
-            const linea5 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaHousesDestroyed(d.HousesDestroyed));
-        
-            const linea6 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaHousesDamaged(d.HousesDamaged));
         
             CASITA.append("path")
             .datum(data)
@@ -518,14 +503,6 @@ function generateEarthquakeImpactGraphs(data) {
             })
 
             // Actualizar lineas
-            const linea5 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaHousesDestroyed(d.HousesDestroyed));
-        
-            const linea6 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaHousesDamaged(d.HousesDamaged));
-
             update.selectAll(".line-HousesDestroyed").transition("nuevaPos311")
             .duration(1000)
                 .attr("d", linea5);
