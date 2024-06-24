@@ -723,6 +723,8 @@ function generateMapGraph() {
             d3.select('#region-name').text(`Chile`);
             d3.select('#earthquake-count').text(`Cantidad total de terremotos: ${totalEarthquakes}`);
 
+            var profundidadVisible = false;
+
             SVG2
             .selectAll("path")
             .data(MapData.features)
@@ -731,35 +733,75 @@ function generateMapGraph() {
             .attr("stroke", "#ccc")
             .attr("fill", d => colorScale(earthquakeCounts[d.properties.Region] || 0))
             .on('click', function(event, d) {
-
-                d3.selectAll('path').classed('opaque', true);
+                // Remover la aplicación de clases 'opaque' y 'border'
+                d3.selectAll('path')
+                    .style('opacity', 0.25); // Hacer todos los paths completamente visibles
+                d3.select(this)
+                    .style('opacity', 1); // Hacer el path clickeado completamente visible
                 d3.selectAll('path').classed('border', false);
-                
-                // Hacer la región clickeada, sus puntos y líneas completamente visibles
-                d3.select(this).classed('opaque', false);
                 d3.select(this).classed('border', true);
                 const data = d;
+            
+                // Opacar todos los círculos que no pertenecen a la región clickeada
+                if (puntosVisibles) {
+                    d3.selectAll('circle:not(#end)')
+                        .style('opacity', function(d) { 
+                            return d.Region !== data.properties.Region ? 0.5 : 1; 
+                        });
+                }
 
-                    // Opacar todos los círculos que no pertenecen a la región clickeada
-                d3.selectAll('circle')
-                .classed('opaque', function(d) { 
-                    return d.Region !== data.properties.Region; 
-                });
+                if (!profundidadVisible) {
+                    d3.selectAll('circle.end')
+                        .style('opacity', 0);
+                }
 
-                d3.selectAll('circle.end')
-                .classed('opaque', function(d) { 
-                    return d.Region !== data.properties.Region; 
-                });
-                
+                if (profundidadVisible) {
+                    d3.selectAll('circle.end')
+                    .style('opacity', function(d) { 
+                        return d.Region !== data.properties.Region ? 0.5 : 1; 
+                    });
+            
                 d3.selectAll('line')
-                .classed('opaque', function(d) { 
-                    return d.Region !== data.properties.Region; 
-                });
+                    .style('opacity', function(d) { 
+                        return d.Region !== data.properties.Region ? 0.5 : 1; 
+                    });
+                }
             
                 // Actualizar el nombre de la región y la cantidad de terremotos
                 d3.select('#region-name').text(`${data.properties.Region}`);
                 d3.select('#earthquake-count').text(`Cantidad de terremotos: ${earthquakeCounts[data.properties.Region]}`);
             })
+            // .on('click', function(event, d) {
+
+            //     d3.selectAll('path').classed('opaque', true);
+            //     d3.selectAll('path').classed('border', false);
+                
+            //     // Hacer la región clickeada, sus puntos y líneas completamente visibles
+            //     d3.select(this).classed('opaque', false);
+            //     d3.select(this).classed('border', true);
+            //     const data = d;
+
+            //         // Opacar todos los círculos que no pertenecen a la región clickeada
+            //     d3.selectAll('circle')
+            //     .classed('opaque', function(d) { 
+            //         return d.Region !== data.properties.Region; 
+            //     });
+
+            //     d3.selectAll('circle.end')
+            //     .classed('opaque', function(d) { 
+            //         return d.Region !== data.properties.Region; 
+            //     });
+                
+            //     d3.selectAll('line')
+            //     .classed('opaque', function(d) { 
+            //         return d.Region !== data.properties.Region; 
+            //     });
+            
+            //     // Actualizar el nombre de la región y la cantidad de terremotos
+            //     d3.select('#region-name').text(`${data.properties.Region}`);
+            //     d3.select('#earthquake-count').text(`Cantidad de terremotos: ${earthquakeCounts[data.properties.Region]}`);
+            // })
+
 
             // Crear un controlador de zoom
             let zoom = d3.zoom()
@@ -854,6 +896,7 @@ function generateMapGraph() {
                     SVG2.selectAll("circle").style("opacity", 1);
                     SVG2.selectAll("circle.end").style("opacity", 0);
                     puntosVisibles = true; // Actualiza la bandera
+                    profundidadVisible = false
                     d3.select('#BotonEpicentros').text('Ocultar epicentros');
                 } else {
                     d3.select('#BotonEpicentros').text('Mostrar epicentros');
@@ -861,6 +904,7 @@ function generateMapGraph() {
                     SVG2.selectAll("circle").style("opacity", 0);
                     SVG2.selectAll("circle.end").style("opacity", 0);
                     SVG2.selectAll("line").style("opacity", 0);
+                    profundidadVisible = false;
                     puntosVisibles = false; // Actualiza la bandera
                     d3.select('#BotonProfundidad').attr('disabled', !puntosVisibles);
                 }
@@ -898,7 +942,7 @@ function generateMapGraph() {
                 .attr("r", 1.5)
                 .attr("fill", "red")
                 .style("opacity", 0); // Inicialmente invisibles
-            
+
                 function generarLineas() {
                     // Restablecer stroke-dasharray y stroke-dashoffset antes de la transición
                     SVG2.selectAll("line")
@@ -922,6 +966,7 @@ function generateMapGraph() {
                         SVG2.selectAll("circle.end")
                             .style("opacity", 1); // Hacerlos visibles
                     }, 2000);
+                    profundidadVisible = true;
                 }
 
             d3.select('#BotonProfundidad').on('click', generarLineas);
