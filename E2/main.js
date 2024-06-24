@@ -520,15 +520,15 @@ function generateEarthquakeImpactGraphs(data) {
     )
 
     // Crear tooltip vacío con clase "tooltip". En el CSS está todo lo necesario
-    let tooltip = d3.select("body").append("div")
-        .style("opacity", 0)
-        .style("width", 200)
-        .style("height", 50)
-        .style("pointer-events", "none")
-        .style("background", "rgb(117, 168, 234)")
-        .style("border-radius", "8px")
-        .style("padding", "4px")
-        .style("position", "absolute");
+    // let tooltip = d3.select("body").append("div")
+    //     .style("opacity", 0)
+    //     .style("width", 200)
+    //     .style("height", 50)
+    //     .style("pointer-events", "none")
+    //     .style("background", "rgb(117, 168, 234)")
+    //     .style("border-radius", "8px")
+    //     .style("padding", "4px")
+    //     .style("position", "absolute");
 
     // Seleccionar todos los puntos
     const puntos = SVG1.selectAll(".casita").selectAll("circle");
