@@ -169,7 +169,7 @@
             <div class="container-head2">
                 <div class="title">Distribución geográfica de los terremotos</div>
                 <div class="description">Análisis de la posición geográfica del epicentro de los terremotos registrados en Chile.</div>
-                <button id="BotonEpicentros">Mostrar epicentro de los terremotos</button>
+                <button id="BotonEpicentros">Mostrar epicentros</button>
                 <button id="BotonProfundidad">Mostrar profundidad epicentro</button>
             </div>
             <div class="vis">
@@ -181,11 +181,92 @@
                 <h2 id="region-name"></h2>
                 <p id="earthquake-count"></p>
             </div>
+            <div class="selected-point-data">
+                <h2>Terremoto seleccionado</h2>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Año: <span id="year2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Mes: <span id="month2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Día: <span id="day2"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Segunda fila -->
+                        <tr>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Lugar: <span id="location2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Magnitud: <span id="magnitude2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Tsunami: <span id="tsunami2"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Tercera fila -->
+                        <tr>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Muertes: <span id="deaths2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Desaparecidos: <span id="missing2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Lesionados: <span id="injuries2"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Daño Económico en MM: <span id="damage2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Casas Destruidas: <span id="housesDes2"></span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="legend-item">
+                                    <div>Casas Dañadas: <span id="housesDam2"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         
         <div class="container-references">
             <div class="title">Referencias</div>
             <div class="description">Aquí se listarán las fuentes de datos utilizadas para este proyecto.</div>
+            <div>Base de datos extraída de este link <a href="https://www.kaggle.com/datasets/miguelciriano/chile-arthquakes-1705-2020">Data set de terremotos en kaggle</a></div>
+            <div>Mapa de Chile por regiones en formato geoJson extraído de este link: <a href="https://github.com/caracena/chile-geojson/blob/master/regiones.json?short_path=6edc146">Archivo geoJson de regiones de chile</a></div>
+            <div>La base del código js del mapa de Chile fue extraída del código del ejemplo_mapa.js de la sección 18 de los ejemplos de código del syllabus del curso, presente en este link: <a href="https://github.com/PUC-Infovis/Syllabus-2024-1/blob/main/Codigos/18-Visualizacion_de_Datos_Espaciales/ejemplo_mapa.js">Ejemplo de visualización de datos espaciales</a></div>
         </div>
 
     </div>

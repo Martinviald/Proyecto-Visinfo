@@ -629,29 +629,48 @@ function generateMapGraph() {
                         // console.log("bounds:");
                         // console.log(minLong);
                         if (d3.geoContains(feature, [d.Longitude, d.Latitude])) {
-                            if (!earthquakeCounts[feature.properties.Region]) {
+                            if (!earthquakeCounts[feature.properties.Region] || earthquakeCounts[feature.properties.Region] === 0) {
+                                // console.log(feature.properties.Region);
                                 earthquakeCounts[feature.properties.Region] = 0;
                             }
+                            // Agregamos un atributo "Region" al objeto "d" para poder filtrar los terremotos por región
+                            d.Region = feature.properties.Region;
+                            // console.log(d.Region);
                             earthquakeCounts[feature.properties.Region]++;
                             suma++;
                         } 
                         else if (d.Latitude >= minLat && d.Latitude <= maxLat) {
                             if (!earthquakeCounts[feature.properties.Region]) {
-                                earthquakeCounts[feature.properties.Region] = 0;
+                                if (earthquakeCounts[feature.properties.Region] != 0) {
+                                    // console.log(feature.properties.Region);
+                                    earthquakeCounts[feature.properties.Region] = 0;
+                                    // console.log(earthquakeCounts[feature.properties.Region]);
+                                }
                             }
-                            earthquakeCounts[feature.properties.Region]++;
-                            suma++;
+                            if (!d.Region) {
+                                d.Region = feature.properties.Region;
+                                earthquakeCounts[feature.properties.Region]++;
+                                suma++;
+                            }
                         }
                     });
                 });
-                return earthquakeCounts;
+            MapData.features.forEach(feature => {
+                if (!earthquakeCounts[feature.properties.Region]) {
+                    earthquakeCounts[feature.properties.Region] = 0;
+                }
+            });
+            // console.log("suma:");
+            // console.log(suma);
+            return earthquakeCounts;
             }
+
 
             const earthquakeCounts = calculateEarthquakes(data, MapData);
 
             // 2. Crear una escala de color
             const colorScale = d3.scaleSequential()
-                .domain([-5, d3.max(Object.values(earthquakeCounts))])
+                .domain([0, d3.max(Object.values(earthquakeCounts))])
                 .interpolator(d3.interpolateReds);
 
             function drawLegend(SVG2, colorScale, earthquakeCounts) {
@@ -706,7 +725,9 @@ function generateMapGraph() {
             // Establecer el nombre de la región y la cantidad de terremotos
             d3.select('#region-name').text(`Chile`);
             d3.select('#earthquake-count').text(`Cantidad total de terremotos: ${totalEarthquakes}`);
-            
+
+            var profundidadVisible = false;
+
             SVG2
             .selectAll("path")
             .data(MapData.features)
@@ -715,97 +736,307 @@ function generateMapGraph() {
             .attr("stroke", "#ccc")
             .attr("fill", d => colorScale(earthquakeCounts[d.properties.Region] || 0))
             .on('click', function(event, d) {
+<<<<<<< vis1ajustes
 
                 generateEarthquakeImpactGraphs(region);
 
                 d3.selectAll('path').classed('opaque', true);
+=======
+                // Remover la aplicación de clases 'opaque' y 'border'
+                d3.selectAll('path')
+                    .style('opacity', 0.25); // Hacer todos los paths completamente visibles
+                d3.select(this)
+                    .style('opacity', 1); // Hacer el path clickeado completamente visible
+>>>>>>> main
                 d3.selectAll('path').classed('border', false);
-                
-                // Hacer la región clickeada, sus puntos y líneas completamente visibles
-                d3.select(this).classed('opaque', false);
                 d3.select(this).classed('border', true);
                 const data = d;
+            
+                // Opacar todos los círculos que no pertenecen a la región clickeada
+                if (puntosVisibles) {
+                    d3.selectAll('circle:not(#end)')
+                        .style('opacity', function(d) { 
+                            return d.Region !== data.properties.Region ? 0.5 : 1; 
+                        });
+                }
+
+                if (!profundidadVisible) {
+                    d3.selectAll('circle.end')
+                        .style('opacity', 0);
+                }
+
+                if (profundidadVisible) {
+                    d3.selectAll('circle.end')
+                    .style('opacity', function(d) { 
+                        return d.Region !== data.properties.Region ? 0.5 : 1; 
+                    });
+            
+                d3.selectAll('line')
+                    .style('opacity', function(d) { 
+                        return d.Region !== data.properties.Region ? 0.5 : 1; 
+                    });
+                }
             
                 // Actualizar el nombre de la región y la cantidad de terremotos
                 d3.select('#region-name').text(`${data.properties.Region}`);
                 d3.select('#earthquake-count').text(`Cantidad de terremotos: ${earthquakeCounts[data.properties.Region]}`);
             })
 
+
             // Crear un controlador de zoom
             let zoom = d3.zoom()
-            .on('zoom', (event) => {
-                SVG2.attr('transform', event.transform);
-            });
+                .scaleExtent([0.5, 5])
+                .on("zoom", zoomed);
 
             // Aplicar el controlador de zoom al SVG
             SVG2.call(zoom);
 
-            // Ajustar el punto central del evento de zoom
-            SVG2.on('mousedown', function(event) {
-            let coords = d3.pointer(event);
-            zoom.scaleBy(SVG2.transition().duration(650), 1.3, coords);
-            });
+            // Variable para rastrear el nivel de zoom actual
+            let currentZoom = d3.zoomIdentity;
 
-            // Agrega los puntos para cada terremoto
-            function generarPuntos() {
-                SVG2
-                .selectAll("circle")
+            function zoomed(event) {
+                currentZoom = event.transform;
+                // console.log(currentZoom);
+                // Aplica el zoom a todos los elementos dentro del SVG que desees que sean afectados por el zoom.
+                // Por ejemplo, si tienes un grupo 'g' que contiene todos los elementos de tu mapa, puedes aplicar el zoom a ese grupo.
+                SVG2.selectAll('path') // Asegúrate de seleccionar todos los elementos que quieras que respondan al zoom
+                    .attr('transform', currentZoom);
+
+                SVG2.selectAll('circle')
+                    .attr('cx', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                    .attr('cy', d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
+                    .attr('r', 1.5 * currentZoom.k);
+                
+                SVG2.selectAll('circle.end')
+                    .attr('cx', d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                    .attr('cy', d => currentZoom.applyY(proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1]))
+                    .attr('r', 1.5 * currentZoom.k);
+
+                SVG2.selectAll('line')
+                    .attr("transform", currentZoom);
+
+                ejeY.selectAll('.scale-text')
+                    .attr('x', currentZoom.applyX(WIDTH_VIS_2 - 50)) // Ejemplo de ajuste en x basado en el zoom
+                    .attr('y', function(d) {
+                        // Aquí necesitas ajustar el cálculo de 'y' basado en tu lógica específica y el zoom
+                        var baseY = 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1];
+                        var adjustment = this.textContent === "0" ? 5 : this.textContent === "10 Km" ? proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13 : 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13;
+                        return currentZoom.applyY(baseY + adjustment); // Ajuste en y basado en el zoom
+                    });
+
+                ejeY.selectAll('.axis-label')
+                    .attr('x', currentZoom.applyX( WIDTH_VIS_2 - 50)) // Ajuste en x basado en el zoom
+                    .attr('y', currentZoom.applyY(150 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 5)); // Ajuste en y basado en el zoom
+                    
+            }
+
+            // Creamos los círculos
+            SVG2.selectAll("circle")
                 .data(data)
-                .enter() // selecciona solo los elementos que aún no existen
-                .append("circle") // agrega un nuevo círculo para cada elemento
-                .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("cy", d => proyeccion([d.Longitude, d.Latitude])[1])
-                .attr("r", 1.5) // radio del círculo
-                .attr("fill", "green") // color del círculo
-                .attr("stroke", "black") // color del contorno
-                .attr("stroke-width", 0.5) // ancho del contorno
-                .attr("class", d => d.Region); // clase para agrupar por región
+                .enter()
+                .append("circle")
+                .attr("cx", d => currentZoom.applyX(proyeccion([d.Longitude, d.Latitude])[0]))
+                .attr("cy", d => currentZoom.applyY(proyeccion([d.Longitude, d.Latitude])[1]))
+                .attr("r", 1.5*currentZoom.k)
+                .attr("fill", "green")
+                .attr("stroke", "black")
+                .attr("stroke-width", 0.5)
+                .attr("class", d => d.Region)
+                .style("opacity", 0)
+                .on("mouseover", (event, d) => {
+                    // console.log("Datos del terremoto:", d);
+                    SVG2.selectAll("circle")
+                    .attr("opacity", dat => dat === d ? 1 : 0.5)
+                    .attr("r", dat => dat === d ? 5 : 1.5*currentZoom.k);
+            
+                    // Selecciona cada <span> por su ID y actualiza su contenido
+                    d3.select("#year2").text(d.Year);
+                    d3.select("#month2").text(d.Month);
+                    d3.select("#day2").text(d.Day); // Corregido el ID aquí
+                    d3.select("#location2").text(d.LocationName);
+                    d3.select("#magnitude2").text(d.Magnitude);
+                    d3.select("#damage2").text(d.Damage);
+                    d3.select("#deaths2").text(d.Deaths);
+                    d3.select("#missing2").text(d.Missing);
+                    d3.select("#injuries2").text(d.Injuries);
+                    d3.select("#housesDes2").text(d.HousesDestroyed);
+                    d3.select("#housesDam2").text(d.HousesDamaged);
+                })
+                .on("mouseleave", (evento, d) => {
+                    // Evento mouseleave
+                    SVG2.selectAll("circle")
+                                .attr("opacity", 1)
+                                .attr("r", 1.5*currentZoom.k);
+                        
+                            d3.select("#year2").text("");
+                            d3.select("#month2").text("");
+                            d3.select("#day2").text("");
+                            d3.select("#location2").text("");
+                            d3.select("#magnitude2").text("");
+                            d3.select("#damage2").text("");
+                            d3.select("#deaths2").text("");
+                            d3.select("#missing2").text("");
+                            d3.select("#injuries2").text("");
+                            d3.select("#housesDes2").text("");
+                            d3.select("#housesDam2").text("");
+                });
 
+            // Variable para rastrear la visibilidad de los puntos
+            let puntosVisibles = false;
+
+            function generarPuntos() {
+                if (!puntosVisibles) {
+                    SVG2.selectAll("circle").style("opacity", 1);
+                    SVG2.selectAll("circle.end").style("opacity", 0);
+                    puntosVisibles = true; // Actualiza la bandera
+                    profundidadVisible = false
+                    d3.select('#BotonEpicentros').text('Ocultar epicentros');
+                } else {
+                    d3.select('#BotonEpicentros').text('Mostrar epicentros');
+                    // Oculta los puntos si están visibles
+                    SVG2.selectAll("circle").style("opacity", 0);
+                    SVG2.selectAll("circle.end").style("opacity", 0);
+                    SVG2.selectAll("line:not(.scale-line)").style("opacity", 0);
+                    profundidadVisible = false;
+                    puntosVisibles = false; // Actualiza la bandera
+                    d3.select('#BotonProfundidad').attr('disabled', !puntosVisibles);
+                }
             }
 
             d3.select('#BotonEpicentros').on('click', generarPuntos);
 
-            // Agregamos una linea de largo "FocalDepth" para cada terremoto
-            function generarLineas() {
-                SVG2.selectAll("circle.end").remove();
+            SVG2.selectAll("line")
+            .data(data)
+            .join("line")
+            .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
+            .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
+            .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
+            .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+            .attr("transform", currentZoom)
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.5)
+            .attr("class", d => d.Region)
+            .attr("stroke-dasharray", function() {
+                const length = this.getTotalLength();
+                return length + " " + length;
+            })
+            .attr("stroke-dashoffset", function() {
+                return this.getTotalLength();
+            });
 
-                SVG2
-                .selectAll("line")
+            // Crear círculos
+            SVG2.selectAll("circle.end")
                 .data(data)
-                .join("line")
-                .attr("x1", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("y1", d => proyeccion([d.Longitude, d.Latitude])[1])
-                .attr("x2", d => proyeccion([d.Longitude, d.Latitude])[0])
-                .attr("y2", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
-                .attr("stroke", "black")
-                .attr("stroke-width", 0.5)
-                .attr("class", d => d.Region)
-                .attr("stroke-dasharray", function() {
-                    const length = this.getTotalLength();
-                    return length + " " + length;
-                })
-                .attr("stroke-dashoffset", function() {
-                    return this.getTotalLength();
-                })
-                .transition()
-                .duration(2000)
-                .attr("stroke-dashoffset", 0);
+                .enter()
+                .append("circle")
+                .attr("class", "end")
+                .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
+                .attr("cy", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
+                .attr("r", 1.5)
+                .attr("fill", "red")
+                .style("opacity", 0); // Inicialmente invisibles
 
-                setTimeout(function() {
-                    SVG2
-                    .selectAll("circle.end")
-                    .data(data)
-                    .enter() // selecciona solo los elementos que aún no existen
-                    .append("circle") // agrega un nuevo círculo para cada elemento
-                    .attr("class", "end")
-                    .attr("cx", d => proyeccion([d.Longitude, d.Latitude])[0])
-                    .attr("cy", d => proyeccion([d.Longitude - 0.15*d.FocalDepth, d.Latitude])[1])
-                    .attr("r", 1.5) // radio del círculo
-                    .attr("fill", "red"); // color del círculo
-                }, 2000);
-            }
+                function generarLineas() {
+                    // Restablecer stroke-dasharray y stroke-dashoffset antes de la transición
+                    SVG2.selectAll("line:not(.scale-line)")
+                        .attr("stroke-dasharray", function() {
+                            return this.getTotalLength();
+                        })
+                        .attr("stroke-dashoffset", function() {
+                            return this.getTotalLength();
+                        })
+                        .style("opacity", 0)
+                        .transition()
+                        .duration(2000)
+                        .attr("stroke-dashoffset", 0)
+                        .style("opacity", 1);
+                
+                    SVG2.selectAll("circle.end")
+                            .style("opacity", 0);
+                
+                    // Aplicar transición a los círculos después del timeout
+                    setTimeout(function() {
+                        SVG2.selectAll("circle.end")
+                            .style("opacity", 1); // Hacerlos visibles
+                    }, 2000);
+                    profundidadVisible = true;
+                }
 
             d3.select('#BotonProfundidad').on('click', generarLineas);
+
+            // Buscamos toda la información del punto con el mayor focalDepth
+            const maxFocalDepth = data.reduce((max, current) => {
+                return current.FocalDepth > max.FocalDepth ? current : max;
+            });
+
+            // Creamos un contenedor para la escala
+            let ejeY = SVG2.append("g")
+                .attr("class", "scale");
+
+            // Creamos una línea de escala del largo maxfocalDepth
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 60)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1])
+                .attr("x2", d => WIDTH_VIS_2 - 60)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("stroke", "black");
+            
+            // Le agregamos una línea horizontal al incio con el número 0 y otra al final con el número maxFocalDepth
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 50 - 15)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1])
+                .attr("x2", d => WIDTH_VIS_2 - 50 - 5)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1])
+                .attr("stroke", "black");
+
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 50 - 15)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("x2", d => WIDTH_VIS_2 - 50 - 5)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("stroke", "black");
+            
+            ejeY.append("line")
+                .attr("class", "scale-line")
+                .attr("x1", d => WIDTH_VIS_2 - 50 - 15)
+                .attr("y1", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("x2", d => WIDTH_VIS_2 - 50 - 5)
+                .attr("y2", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .attr("stroke", "black");
+
+            
+            // Agregamos el texto 0
+            ejeY.append("text")
+                .attr("class", "axis-label")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 150 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 5)
+                .attr("text-anchor", "end")
+                .text("Escala de profundidad (Km)");
+
+            // Agregamos el texto 0
+            ejeY.append("text")
+                .attr("class", "scale-text")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 5)
+                .text("0");
+
+            // Agregamos el texto maxFocalDepth
+            ejeY.append("text")
+                .attr("class", "scale-text")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .text("10 Km");
+            
+            ejeY.append("text")
+                .attr("class", "scale-text")
+                .attr("x", d => WIDTH_VIS_2 - 50)
+                .attr("y", d => 20 + proyeccion([maxFocalDepth.Longitude, maxFocalDepth.Latitude])[1] + 2 * proyeccion([maxFocalDepth.Longitude - 0.15*maxFocalDepth.FocalDepth, maxFocalDepth.Latitude])[1]/13)
+                .text("20 Km");
+            
+            
 
         });
     });
