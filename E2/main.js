@@ -66,6 +66,7 @@ d3.selectAll(".magnitudeFilterButton").on("click", function() {
     }
 
     generateEarthquakeImpactGraphs(filteredData);
+    console.log(filteredData);
 });
 
 function filtrarVis1(region) {
@@ -74,7 +75,8 @@ function filtrarVis1(region) {
 
 
 function generateEarthquakeImpactGraphs(data) {
-    // console.log(data);
+    console.log("data filtrada por region: ", data);
+    data.sort((a, b) => a.Year - b.Year);
 
     // ESCALAS
     const escalaColorCategorica1 = d3.scaleOrdinal(["red", "orange", "yellowgreen"]);
@@ -141,7 +143,7 @@ function generateEarthquakeImpactGraphs(data) {
 
     contenedor1
     .append("g")
-    .attr("class", "ejeX")
+    .attr("class", "ejeX1")
     .attr("transform", `translate(${0}, ${HEIGHTVIS_VIS_1})`)
     .call(ejeX);
 
@@ -161,7 +163,7 @@ function generateEarthquakeImpactGraphs(data) {
 
     contenedor2
     .append("g")
-    .attr("class", "ejeX")
+    .attr("class", "ejeX2")
     .attr("transform", `translate(${0}, ${HEIGHTVIS_VIS_1})`)
     .call(ejeX);
     contenedor2
@@ -173,7 +175,7 @@ function generateEarthquakeImpactGraphs(data) {
 
     contenedor3
     .append("g")
-    .attr("class", "ejeX")
+    .attr("class", "ejeX3")
     .attr("transform", `translate(${0}, ${HEIGHTVIS_VIS_1})`)
     .call(ejeX);
 
@@ -189,6 +191,31 @@ function generateEarthquakeImpactGraphs(data) {
     .attr("transform", `translate(${WIDTHVIS_VIS_1/4}, ${0})`)
     .attr("stroke", escalaColorCategorica3(1))
     .call(ejeY32);
+
+    // Definir la función de línea
+    const linea1 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaDeaths(d.Deaths));
+
+    const linea2 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaInjuries(d.Missing));
+
+    const linea3 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaInjuries(d.Injuries));
+
+    const linea4 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaDamage(d.Damage));
+    
+    const linea5 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaHousesDestroyed(d.HousesDestroyed));
+
+    const linea6 = d3.line()
+    .x(d => escalaX(d.Year))
+    .y(d => escalaHousesDamaged(d.HousesDamaged));
 
 
     // CREAMOS LA VISUALIZACIÓN
@@ -223,46 +250,33 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaInjuries(d.Injuries));
 
-            // // Definir la función de línea
-            // const linea1 = d3.line()
-            // .x(d => escalaX(d.Year))
-            // .y(d => escalaDeaths(d.Deaths));
+            // Agregar la línea al contenedor
+            CASITA.append("path")
+            .datum(data)
+            .attr("class", "line-Deaths")
+            .attr("fill", "none")
+            .attr("opacity", 1)
+            .attr("stroke", escalaColorCategorica1(0))
+            .attr("stroke-width", 0.75)
+            .attr("d", linea1);
 
-            // const linea2 = d3.line()
-            // .x(d => escalaX(d.Year))
-            // .y(d => escalaInjuries(d.Missing));
+            CASITA.append("path")
+            .datum(data)
+            .attr("class", "line-Missing")
+            .attr("fill", "none")
+            .attr("opacity", 1)
+            .attr("stroke", escalaColorCategorica1(1))
+            .attr("stroke-width", 0.75)
+            .attr("d", linea2);
 
-            // const linea3 = d3.line()
-            // .x(d => escalaX(d.Year))
-            // .y(d => escalaInjuries(d.Injuries));
-
-            // // Agregar la línea al contenedor
-            // CASITA.append("path")
-            // .datum(data)
-            // .attr("class", "line-Deaths")
-            // .attr("fill", "none")
-            // .attr("opacity", 1)
-            // .attr("stroke", escalaColorCategorica1(0))
-            // .attr("stroke-width", 0.75)
-            // .attr("d", linea1);
-
-            // CASITA.append("path")
-            // .datum(data)
-            // .attr("class", "line-Missing")
-            // .attr("fill", "none")
-            // .attr("opacity", 1)
-            // .attr("stroke", escalaColorCategorica1(1))
-            // .attr("stroke-width", 0.75)
-            // .attr("d", linea2);
-
-            // CASITA.append("path")
-            // .datum(data)
-            // .attr("class", "line-Injuries")
-            // .attr("fill", "none")
-            // .attr("opacity", 1)
-            // .attr("stroke", escalaColorCategorica1(2))
-            // .attr("stroke-width", 0.75)
-            // .attr("d", linea3);
+            CASITA.append("path")
+            .datum(data)
+            .attr("class", "line-Injuries")
+            .attr("fill", "none")
+            .attr("opacity", 1)
+            .attr("stroke", escalaColorCategorica1(2))
+            .attr("stroke-width", 0.75)
+            .attr("d", linea3);
 
             CASITA.transition("crear")
                 .duration(500)
@@ -272,110 +286,68 @@ function generateEarthquakeImpactGraphs(data) {
         },
         update => {            
             // Actualizar ejes
-            contenedor1.selectAll(".ejeX").call(ejeX);
+            contenedor1.selectAll(".ejeX1").call(ejeX);
             contenedor1.selectAll(".ejeY1").call(ejeY11);
             contenedor1.selectAll(".ejeY1").attr("transform", `translate(${0}, ${0})`);
             contenedor1.selectAll(".ejeY2").call(ejeY12);
             contenedor1.selectAll(".ejeY2").attr("transform", `translate(${WIDTHVIS_VIS_1/4}, ${0})`)
-
-            console.log(update);
-
-            const CASITA = update.selectAll(".casita");
-            console.log("UPDATE");
-            console.log(CASITA);
-            console.log("UPDATE");
-
-            console.log("UPDATE circle deaths");
-            console.log(CASITA._parents[0]);
-            console.log("UPDATE circle deaths");
-
-            CASITA.selectAll("circle")
-            .transition()
-            .duration(500)
-            .attr("cx", (d) => escalaX(d.Year))
-            .attr("cy", function(d) {
-                if (d3.select(this).attr("class") === "Deaths") {
-                    console.log("death");
-                    console.log(d.id);
-                    return escalaDeaths(d.Deaths);
-                } else if (d3.select(this).attr("class") === "Missing") {
-                    console.log("missing");
-                    console.log(d.id);
-                    return escalaInjuries(d.Missing);
-                } else if (d3.select(this).attr("class") === "Injuried") {
-                    console.log("injurie");
-                    console.log(d.id);
-                    return escalaInjuries(d.Injuries);
-                }
-            });
-
-            // // Actualizar círculos
-            // update.selectAll("circle").selectAll(".Deaths").transition("nuevaPos1")
-            // .duration(1000)
-            // .attr("cx", (d, i) => {
-            //     const cx = escalaX(d.Year);
-            //     return cx;
-            // })
-            // .attr("cy", (d, i) => {
-            //     const cy = escalaDeaths(d.Deaths);
-            //     return cy;
-            // })
-
-            // update.selectAll(".Missing").transition("nuevaPos2")
-            // .duration(1000)
-            // .attr("cx", (d, i) => {
-            //     const cx = escalaX(d.Year);
-            //     return cx;
-            // })
-            // .attr("cy", (d, i) => {
-            //     const cy = escalaInjuries(d.Missing);
-            //     return cy;
-            // })
-
-            // update.selectAll(".Injuries").transition("nuevaPos3")
-            // .duration(1000)
-            // .attr("cx", (d, i) => {
-            //     const cx = escalaX(d.Year);
-            //     return cx;
-            // })
-            // .attr("cy", (d, i) => {
-            //     const cy = escalaInjuries(d.Injuries);
-            //     return cy;
-            // })
             
 
-            // // Actualizar líneas
-            // const linea1 = d3.line()
-            //     .x(d => escalaX(d.Year))
-            //     .y(d => escalaDeaths(d.Deaths));
+            // console.log(update);
+            // const CASITA = update.selectAll(".casita");
+            // console.log("UPDATE");
+            // console.log(CASITA);
+            // console.log("UPDATE");
+            // console.log("UPDATE circle deaths");
+            // console.log(CASITA._parents[0]);
+            // console.log("UPDATE circle deaths");
 
-            // const linea2 = d3.line()
-            //     .x(d => escalaX(d.Year))
-            //     .y(d => escalaMissing(d.Missing));
+            // Actualizar círculos
+            update.selectAll(".Deaths").transition("nuevaPos1")
+            .duration(1000)
+            .attr("cx", (d, i) => {
+                const cx = escalaX(d.Year);
+                return cx;
+            })
+            .attr("cy", (d, i) => {
+                const cy = escalaDeaths(d.Deaths);
+                return cy;
+            })
 
-            // const linea3 = d3.line()
-            //     .x(d => escalaX(d.Year))
-            //     .y(d => escalaInjuries(d.Injuries));
+            update.selectAll(".Missing").transition("nuevaPos2")
+            .duration(1000)
+            .attr("cx", (d, i) => {
+                const cx = escalaX(d.Year);
+                return cx;
+            })
+            .attr("cy", (d, i) => {
+                const cy = escalaInjuries(d.Missing);
+                return cy;
+            })
 
-            // update.selectAll(".line-Deaths").transition("nuevaPos11")
-            // .duration(1000)
-            //     .datum(data)
-            //     .attr("d", linea1);
-
-            // update.selectAll(".line-Missing").transition("nuevaPos12")
-            // .duration(1000)
-            // .datum(data)
-            //     .attr("d", linea2);
-
-            // update.selectAll(".line-Injuried").transition("nuevaPos13")
-            // .duration(1000)
-            // .datum(data)
-            //     .attr("d", linea3);
+            update.selectAll(".Injuries").transition("nuevaPos3")
+            .duration(1000)
+            .attr("cx", (d, i) => {
+                const cx = escalaX(d.Year);
+                return cx;
+            })
+            .attr("cy", (d, i) => {
+                const cy = escalaInjuries(d.Injuries);
+                return cy;
+            })
             
-            // Transición
-            // update.transition("aparecer")
-            //     .duration(2000)
-            //     .style("opacity", 1)
+            // Actualizar Lineas
+            update.selectAll(".line-Deaths").transition("nuevaPos11")
+            .duration(1000)
+                .attr("d", linea1);
+
+            update.selectAll(".line-Missing").transition("nuevaPos12")
+            .duration(1000)
+                .attr("d", linea2);
+
+            update.selectAll(".line-Injuried").transition("nuevaPos13")
+            .duration(1000)
+                .attr("d", linea3);
 
             return update
         },
@@ -399,14 +371,10 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("r", 2)
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaDamage(d.Damage));
-            
-            const linea4 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaDamage(d.Damage));
         
             CASITA.append("path")
             .datum(data)
-            .attr("class", "line")
+            .attr("class", "line-EconomicDamage")
             .attr("fill", "none")
             .attr("opacity", 1)
             .attr("stroke", escalaColorCategorica2())
@@ -421,9 +389,33 @@ function generateEarthquakeImpactGraphs(data) {
         },
         update => {
             // Actualizar ejes
-            contenedor2.selectAll(".ejeX").call(ejeX);
+            contenedor2.selectAll(".ejeX2").call(ejeX);
             contenedor2.selectAll(".ejeY").call(ejeY2);
             contenedor2.selectAll(".ejeY").attr("transform", `translate(${0}, ${0})`)
+
+            // update.selectAll(".EconomicDamage").transition("nuevaPos21")
+            // .duration(1000)
+            // .attr("transform", (d, i) => {
+            //     const x = escalaX(d.Year);
+            //     const y = escalaDamage(d.Damage);
+            //     return `translate(${x}, ${y})`;})
+
+            // Actualizar circulos
+            update.selectAll(".EconomicDamage").transition("nuevaPos21")
+            .duration(1000)
+            .attr("cx", (d, i) => {
+                const cx = escalaX(d.Year);
+                return cx;
+            })
+            .attr("cy", (d, i) => {
+                const cy = escalaDamage(d.Damage);
+                return cy;
+            })
+
+            // Actualizar lineas
+            update.selectAll(".line-EconomicDamage").transition("nuevaPos212")
+            .duration(1000)
+                .attr("d", linea4);
 
             return update
         },
@@ -454,14 +446,6 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("r", 2)
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaHousesDamaged(d.HousesDamaged));
-
-            const linea5 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaHousesDestroyed(d.HousesDestroyed));
-        
-            const linea6 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaHousesDamaged(d.HousesDamaged));
         
             CASITA.append("path")
             .datum(data)
@@ -489,12 +473,43 @@ function generateEarthquakeImpactGraphs(data) {
         },
         update => {
             // Actualizar ejes
-
-            contenedor3.selectAll(".ejeX").call(ejeX);
+            contenedor3.selectAll(".ejeX3").call(ejeX);
             contenedor3.selectAll(".ejeY1").call(ejeY11);
             contenedor3.selectAll(".ejeY1").attr("transform", `translate(${0}, ${0})`);
             contenedor3.selectAll(".ejeY2").call(ejeY12);
             contenedor3.selectAll(".ejeY2").attr("transform", `translate(${WIDTHVIS_VIS_1/4}, ${0})`)
+
+            // Actualizar Circulos
+            update.selectAll(".HousesDestroyed").transition("nuevaPos31")
+            .duration(1000)
+            .attr("cx", (d, i) => {
+                const cx = escalaX(d.Year);
+                return cx;
+            })
+            .attr("cy", (d, i) => {
+                const cy = escalaHousesDestroyed(d.HousesDestroyed);
+                return cy;
+            })
+
+            update.selectAll(".HousesDamaged").transition("nuevaPos32")
+            .duration(1000)
+            .attr("cx", (d, i) => {
+                const cx = escalaX(d.Year);
+                return cx;
+            })
+            .attr("cy", (d, i) => {
+                const cy = escalaHousesDamaged(d.HousesDamaged);
+                return cy;
+            })
+
+            // Actualizar lineas
+            update.selectAll(".line-HousesDestroyed").transition("nuevaPos311")
+            .duration(1000)
+                .attr("d", linea5);
+
+            update.selectAll(".line-HousesDamaged").transition("nuevaPos312")
+            .duration(1000)
+                .attr("d", linea6);
 
             return update
         },
@@ -505,15 +520,15 @@ function generateEarthquakeImpactGraphs(data) {
     )
 
     // Crear tooltip vacío con clase "tooltip". En el CSS está todo lo necesario
-    let tooltip = d3.select("body").append("div")
-        .style("opacity", 0)
-        .style("width", 200)
-        .style("height", 50)
-        .style("pointer-events", "none")
-        .style("background", "rgb(117, 168, 234)")
-        .style("border-radius", "8px")
-        .style("padding", "4px")
-        .style("position", "absolute");
+    // let tooltip = d3.select("body").append("div")
+    //     .style("opacity", 0)
+    //     .style("width", 200)
+    //     .style("height", 50)
+    //     .style("pointer-events", "none")
+    //     .style("background", "rgb(117, 168, 234)")
+    //     .style("border-radius", "8px")
+    //     .style("padding", "4px")
+    //     .style("position", "absolute");
 
     // Seleccionar todos los puntos
     const puntos = SVG1.selectAll(".casita").selectAll("circle");
@@ -591,8 +606,8 @@ function generateMapGraph() {
     const EarthquakeData = fetchEarthquakeData();
 
     EarthquakeData.then(data => {
-        // console.log("EarthquakeData:")
-        // console.log(data);
+        console.log("EarthquakeData:")
+        console.log(data);
 
         d3.json("regiones_chile.json").then((MapData) => {
 
@@ -736,29 +751,43 @@ function generateMapGraph() {
             .attr("stroke", "#ccc")
             .attr("fill", d => colorScale(earthquakeCounts[d.properties.Region] || 0))
             .on('click', function(event, d) {
-<<<<<<< vis1ajustes
 
-                generateEarthquakeImpactGraphs(region);
-
-                d3.selectAll('path').classed('opaque', true);
-=======
+                // generateEarthquakeImpactGraphs(d);
                 // Remover la aplicación de clases 'opaque' y 'border'
                 d3.selectAll('path')
                     .style('opacity', 0.25); // Hacer todos los paths completamente visibles
                 d3.select(this)
                     .style('opacity', 1); // Hacer el path clickeado completamente visible
->>>>>>> main
                 d3.selectAll('path').classed('border', false);
                 d3.select(this).classed('border', true);
                 const data = d;
-            
+                // console.log(MapData);
+
+                // DATA.filter(d => d.Magnitude >= 5.0 && d.Magnitude <= 6.0);
+                var dataFiltrada = [];
+                var cont = 0;
                 // Opacar todos los círculos que no pertenecen a la región clickeada
                 if (puntosVisibles) {
                     d3.selectAll('circle:not(#end)')
                         .style('opacity', function(d) { 
+                            if (d.Region !== data.properties.Region) {
+                            } else {
+                                dataFiltrada[cont] = d;
+                                cont += 1;
+                            }
                             return d.Region !== data.properties.Region ? 0.5 : 1; 
                         });
+                } else {
+                    d3.selectAll('circle:not(#end)')
+                        .style('opacity', function(d) { 
+                            if (d.Region !== data.properties.Region) {
+                            } else {
+                                dataFiltrada[cont] = d;
+                                cont += 1;
+                            }
+                        });
                 }
+                generateEarthquakeImpactGraphs(dataFiltrada);
 
                 if (!profundidadVisible) {
                     d3.selectAll('circle.end')
