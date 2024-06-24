@@ -65,7 +65,7 @@ d3.selectAll(".magnitudeFilterButton").on("click", function() {
         filteredData = DATA;
     }
 
-    generateEarthquakeImpactGraphs(filteredData, range);
+    generateEarthquakeImpactGraphs(filteredData);
 });
 
 function filtrarVis1(region) {
@@ -198,6 +198,9 @@ function generateEarthquakeImpactGraphs(data) {
     .join(
         enter => {
             const CASITA = enter.append("g").attr("class", "casita").style("opacity", 0);
+            console.log("ENTER");
+            console.log(CASITA);
+            console.log("ENTER");
 
             CASITA.append("circle")
                 .attr("class", "Deaths")
@@ -220,46 +223,46 @@ function generateEarthquakeImpactGraphs(data) {
                 .attr("cx", (d) => escalaX(d.Year))
                 .attr("cy", (d) => escalaInjuries(d.Injuries));
 
-            // Definir la función de línea
-            const linea1 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaDeaths(d.Deaths));
+            // // Definir la función de línea
+            // const linea1 = d3.line()
+            // .x(d => escalaX(d.Year))
+            // .y(d => escalaDeaths(d.Deaths));
 
-            const linea2 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaInjuries(d.Missing));
+            // const linea2 = d3.line()
+            // .x(d => escalaX(d.Year))
+            // .y(d => escalaInjuries(d.Missing));
 
-            const linea3 = d3.line()
-            .x(d => escalaX(d.Year))
-            .y(d => escalaInjuries(d.Injuries));
+            // const linea3 = d3.line()
+            // .x(d => escalaX(d.Year))
+            // .y(d => escalaInjuries(d.Injuries));
 
-            // Agregar la línea al contenedor
-            CASITA.append("path")
-            .datum(data)
-            .attr("class", "line-Deaths")
-            .attr("fill", "none")
-            .attr("opacity", 1)
-            .attr("stroke", escalaColorCategorica1(0))
-            .attr("stroke-width", 0.75)
-            .attr("d", linea1);
+            // // Agregar la línea al contenedor
+            // CASITA.append("path")
+            // .datum(data)
+            // .attr("class", "line-Deaths")
+            // .attr("fill", "none")
+            // .attr("opacity", 1)
+            // .attr("stroke", escalaColorCategorica1(0))
+            // .attr("stroke-width", 0.75)
+            // .attr("d", linea1);
 
-            CASITA.append("path")
-            .datum(data)
-            .attr("class", "line-Missing")
-            .attr("fill", "none")
-            .attr("opacity", 1)
-            .attr("stroke", escalaColorCategorica1(1))
-            .attr("stroke-width", 0.75)
-            .attr("d", linea2);
+            // CASITA.append("path")
+            // .datum(data)
+            // .attr("class", "line-Missing")
+            // .attr("fill", "none")
+            // .attr("opacity", 1)
+            // .attr("stroke", escalaColorCategorica1(1))
+            // .attr("stroke-width", 0.75)
+            // .attr("d", linea2);
 
-            CASITA.append("path")
-            .datum(data)
-            .attr("class", "line-Injuries")
-            .attr("fill", "none")
-            .attr("opacity", 1)
-            .attr("stroke", escalaColorCategorica1(2))
-            .attr("stroke-width", 0.75)
-            .attr("d", linea3);
+            // CASITA.append("path")
+            // .datum(data)
+            // .attr("class", "line-Injuries")
+            // .attr("fill", "none")
+            // .attr("opacity", 1)
+            // .attr("stroke", escalaColorCategorica1(2))
+            // .attr("stroke-width", 0.75)
+            // .attr("d", linea3);
 
             CASITA.transition("crear")
                 .duration(500)
@@ -275,8 +278,39 @@ function generateEarthquakeImpactGraphs(data) {
             contenedor1.selectAll(".ejeY2").call(ejeY12);
             contenedor1.selectAll(".ejeY2").attr("transform", `translate(${WIDTHVIS_VIS_1/4}, ${0})`)
 
+            console.log(update);
+
+            const CASITA = update.selectAll(".casita");
+            console.log("UPDATE");
+            console.log(CASITA);
+            console.log("UPDATE");
+
+            console.log("UPDATE circle deaths");
+            console.log(CASITA._parents[0]);
+            console.log("UPDATE circle deaths");
+
+            CASITA.selectAll("circle")
+            .transition()
+            .duration(500)
+            .attr("cx", (d) => escalaX(d.Year))
+            .attr("cy", function(d) {
+                if (d3.select(this).attr("class") === "Deaths") {
+                    console.log("death");
+                    console.log(d.id);
+                    return escalaDeaths(d.Deaths);
+                } else if (d3.select(this).attr("class") === "Missing") {
+                    console.log("missing");
+                    console.log(d.id);
+                    return escalaInjuries(d.Missing);
+                } else if (d3.select(this).attr("class") === "Injuried") {
+                    console.log("injurie");
+                    console.log(d.id);
+                    return escalaInjuries(d.Injuries);
+                }
+            });
+
             // // Actualizar círculos
-            // update.selectAll(".Deaths").transition("nuevaPos1")
+            // update.selectAll("circle").selectAll(".Deaths").transition("nuevaPos1")
             // .duration(1000)
             // .attr("cx", (d, i) => {
             //     const cx = escalaX(d.Year);
